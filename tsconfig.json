@@ -1,0 +1,38 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./nightwatch/tsconfig.json"
+    }
+  ],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "strict": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["vite/client"]
+  },
+  "include": [
+             "../src/**/*.ts", 
+             "src/**/*.d.ts", 
+             "src/**/*.tsx", 
+             "/src/**/*.vue",
+             "src/**/*.ts"
+             ]
+}
