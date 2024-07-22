@@ -89,11 +89,14 @@ const resolveImage = (src: string) => {
   letter-spacing: 0.16px;
 }
 .description {
-  color: #8E8E8E;
-  font-size: 12px;
-  font-family: Quicksand;
-  font-weight: 700;
-  line-height: 22px;
-  letter-spacing: 0.12px;
+  width: 193px; 
+  height: 18px; 
+  color: #8E8E8E; 
+  font-size: 12px; 
+  font-family: Quicksand; 
+  font-weight: 700; 
+  line-height: 22px; 
+  letter-spacing: 0.12px; 
+  word-wrap: break-word;
 }
 </style>

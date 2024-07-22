@@ -1,5 +1,6 @@
 // src/services/axiosConfig.ts
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
+import vue from '../router'
 
 
 // 创建一个 axios 实例
@@ -19,6 +20,10 @@ axiosInstance.interceptors.request.use(
     if (token) {
       // 在请求头中添加 token
       config.headers.Token = `${token}`
+    }
+    else{
+      //跳到登录
+      this.$router.push('login')
     }
     return config
   },

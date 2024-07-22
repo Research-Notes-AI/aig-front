@@ -2,6 +2,17 @@
 <div class="Frame3658" style=" height: 1017px; background: #FCFCFC; justify-content: flex-start; align-items: flex-start; display: inline-flex">
   <div class="setting">
     <div class="setup">
+      <div class="ImageP">
+        <div class="image-frame">
+          <div class="text-label">参考图片</div>
+          <div class="reference-description">上传后会生成与参考图片相似的图片</div>
+        </div>
+        <div class="SdtoolsImageP">
+          <ImageUploader
+           :imageUrl="imageUrl"
+           @uploadSuccess="handleUploadSuccess"/>
+        </div>
+      </div>
       <div class="prompt">
         <div class="Frame3659">
           <div class="title">提示词</div>
@@ -108,6 +119,22 @@
           <div class="relevance-label">更贴近提示词</div>
         </div>
       </div>
+      <div class="progressbar">
+        <div class="Frame3662">
+          <div class="title">贴近参考图程度</div>
+        </div>
+           <ProgressBar 
+           :class="{ 'expanded': previewVisible }" 
+           id="imageRelevance" 
+           class="ProgressBar" 
+           :selectedPercentage="keywordsRelevance"
+           @update:selectedPercentage="updateSelectedPercentage"
+           />
+        <div class="Frame3660">
+          <div class="creative-label">更有创意</div>
+          <div class="relevance-label">更贴近参考图</div>
+        </div>
+      </div>
       <div class="seeds">
         <div class="Frame1000003490">
           <div class="Frame1000003524">
@@ -177,7 +204,7 @@
          @imageDeleted="handleImageDeleted" 
          :taskDetail="taskDetail"
          class="preview-image"
-         :show-reference-option="false"
+         :show-reference-option="true"
           />  
  </div>
 </template>
@@ -189,6 +216,7 @@ import ProgressBar from './ProgressBar.vue';
 import { setMapStoreSuffix } from 'pinia';
 import axiosInstance from '@/services/axiosConfig';
 import PreviewImage from '@/components/PreviewImage.vue';
+import ImageUploader from './ImageUploader.vue';
 
 
 const toast = useToast();
@@ -196,6 +224,12 @@ const toast = useToast();
 const keywordsInput = ref<string>('');
 const imKeywordsInput = ref<string>('');
 const isGenerating = ref(false); // 控制生成图片按钮是否可点击的状态
+
+const isImageUploaded = ref(false);
+const uploadedImageId = ref<Number | null>(null);
+const imageUrl = ref<string | null>(null); // 用于传递给 ImageUploader.vue 的图标
+const uploadedImageUrl = ref<string | null>(null);
+const referenceImage = ref<string | null>(null);
 
 /* 提示词下文本输入*/
 const text = ref('');
@@ -231,12 +265,16 @@ const selectedOption = ref(options.value[0].text);
 
 //图片与词的相关性
 const keywordsRelevance = ref(0.8);
+const imageRelevance = ref(0.8);
 const updateKeywordsRelevance = (value: number) => {
   keywordsRelevance.value = value;
 };
 
 const selectedImageId = ref(null);
 const previewVisible = ref(false);
+
+
+
 
 let taskId = ref<string | null>(null);
 let taskStatus = ref<string | null>(null);
@@ -246,11 +284,23 @@ let taskDetail = ref()
 //图片结果
 const generatedImages = ref([]);
 const imageList = ref<string | null>(null);
+  const updateimageRelevance = (value: number) => {
+  imageRelevance.value = value;
+};
 
+//上传成功事件动作
+const handleUploadSuccess = (imageId: Number) => {
+  isImageUploaded.value = true;
+  uploadedImageId.value = imageId;
+  uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageId}`; //更新图标
+  imageUrl.value = uploadedImageUrl.value; // 更新图标
+  console.log(imageUrl.value);
+
+}; 
 
 
 //创建任务参数
-const task_type = ref(0);
+const task_type = ref(1);//图生图
 const width = ref<number>(512);
 const height = ref<number>(512);
 const steps = ref<number>(25);
@@ -289,6 +339,9 @@ const createTask = async () => {
         steps: steps.value,
         seed: seed.value,
         name: name.value,
+        ref_image_sim: imageRelevance.value,
+        ref_image_id: uploadedImageId.value, // 上传成功后imageId
+
         
       }
        const response = await axiosInstance.post(`/task/`, params);
@@ -451,14 +504,14 @@ textarea {
   gap: 113px; 
   display: inline-flex;
 }
-.prompt, .imprompt, .steps, .seeds {
+.imageP, .prompt, .imprompt, .steps, .seeds {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
   gap: 10px;
 }
-.Frame3659, .Frame1000003490,.imageNum, .imageWH, .progressbar {
+.Frame1000003490,.imageNum, .imageWH, .progressbar {
 
   display: flex;
   width: 420px;

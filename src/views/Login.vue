@@ -116,6 +116,7 @@ html, body {
 .Abstract06 {
   width: 500px;
   height: 100%;
+  margin: 0;
 }
 
 .right {

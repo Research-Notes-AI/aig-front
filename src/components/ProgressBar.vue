@@ -50,13 +50,17 @@ const selectPercentage = (step: number) => {
   emit('update:selectedPercentage', step);
 };
 
+// watch(() => props.selectedPercentage, (newVal) => {
+//   localSelectedPercentage.value = newVal;
+// });
+
 const percentageStyle = computed(() => ({
   left: `calc(${localSelectedPercentage.value}% - 20px)` // 调整位置使其居中
 }));
 
-const highlightBoxStyle = computed(() => ({
-  left: `calc(${localSelectedPercentage.value}% - 10px)` // 调整位置使其居中
-}));
+// const highlightBoxStyle = computed(() => ({
+//   left: `calc(${localSelectedPercentage.value}% - 10px)` // 调整位置使其居中
+// }));
 </script>
 
 <style scoped>
@@ -110,10 +114,13 @@ const highlightBoxStyle = computed(() => ({
   border-radius: 1px;
 }
 
-.step-indicator .progress-step.selected {
+.step-indicator .progress-step{
   background-color: #377dff;
 }
 
+.step-indicator.selected{
+  background-color: #377dff;
+}
 .relativity {
   align-self: stretch;
   height: 52px;

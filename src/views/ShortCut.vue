@@ -11,13 +11,11 @@
         </div>
       </div>
       <div class="CommonSidebarLeft" >
-        <div class="SidebarLeft">
           <img :src="isCollapsed ? '../src/assets/sidebar-right.png' : '../src/assets/sidebar-left.png'" @click="toggleSidebar" />
-        </div>
       </div>
     </div>
     <div class="Frame_blank">
-      <div class="leftMid">
+      <div class="leftMid" >
         <SidebarItem
           title="快捷场景"
           description="常用场景快捷生图"
@@ -42,28 +40,22 @@
               <img src="../assets/document-code.png">
             </div>
             <div class="code2image" v-if="!isCollapsed" >
-              <div>高级生图</div>
-              <div class="Prompt">用英文Prompt与完整参数生成图片</div>
+              <div class="title">高级生图</div>
+              <div class="tips">用英文Prompt与完整参数生成图片</div>
             </div>
           </div>
+          <div v-if="!isCollapsed">建设中</div>
         </div>    
-              <div v-if="!isCollapsed">建设中</div>
+              
       </div>
-      <!-- <div v-if="currentTitle === '中文生图'">
-    <div class="tabs">
-      <button @click="currentTab = '文生图'" :class="{ active: currentTab === '文生图' }">文生图</button>
-      <button @click="currentTab = '图生图'" :class="{ active: currentTab === '图生图' }">图生图</button>
-    </div>
-    <component :is="currentTabComponent" />
-  </div> -->
-      <div class="leftBottom">
+      <div class="leftBottom" >
         <div class="Frame1000003507">
           <div class="ComponentAbstract01">
             <div class="ComponentAbstract06">
               <img class="Abstract06" src="../assets/profile-circle.png" />
             </div>
           </div>
-          <div class="Larrykey">LarryKey</div>
+          <div class="Larrykey" v-if="!isCollapsed" >LarryKey</div>
         </div>
         <div class="Frame1000003506">
           <div class="CommonDocumentText">
@@ -73,7 +65,7 @@
               </div>
             </div>
           </div>
-          <div>教程</div>
+          <div v-if="!isCollapsed" >教程</div>
         </div>
         <div class="Frame1000003509">
           <div class="CommonMessageText">
@@ -83,7 +75,7 @@
               </div>
             </div>
           </div>
-          <div>论坛</div>
+          <div v-if="!isCollapsed" >论坛</div>
         </div>
       </div>
     </div>
@@ -91,8 +83,26 @@
   <div class="['sideRight', { expanded: isCollapsed } ]" >
     <div class="right-top">
     <div class="right-top-inner">
-      <div class="title">{{ activeTitle }}</div>
+      
+      <div v-if="currentTitle==='中文生图'" class="tabs-container" >
+        <div 
+         class="tab" 
+         :class="{ active: activeTab === '文生图' }" 
+         @click="selectTab('文生图')"
+          >
+         文生图
+        </div>
+        <div 
+        class="tab" 
+        :class="{ active: activeTab === '图生图' }" 
+        @click="selectTab('图生图')"
+        >
+         图生图
+        </div>
+       </div>
+       <div v-else class="title" >{{ currentTitle }}</div>
     </div>
+      
     <div class="ComponentHistory">
       <div class="Frame1000003526">
         <div class="SdtoolsHistory">
@@ -121,7 +131,7 @@
       <div class="sideright2" :class="{ 'expanded': previewVisible }">
       <div class="Frame3666">
       <div class="prompt">
-        <div class="Frame3659">
+        <div class="prompt-frame">
           <div class="text-label">提示词</div>
           <div class="text-count">{{ keywordsInput.length }}/1000</div>
         </div>
@@ -206,9 +216,11 @@
             <img class="imageItem" :src="'http://13.215.140.116:5001/api/v1/image/' + image.id" :alt="image.title" />
          </div>
       </div>
-    <div v-if="!(generatedImages.length)" class="Frame3"  @click="generateImages" :disabled="isGenerating">
-        
-        <div class="generate-button" >生成图片</div>
+    <div v-if="!(generatedImages.length)" class="Frame3"     
+            @click="generateImages" 
+            :class="{'disabled':isGenerating}">
+        <div class="generate-button" 
+             >生成图片</div>
     </div>
     <div v-else class="action-buttons">
       <div class="download" @click="downloadAllImages('image.zip')">
@@ -216,7 +228,7 @@
           <img src="../assets/download.png" class="icon">
           <div class="text">
              全部下载
-             <div class="description">打包下载生成的所有图片</div>
+             <div class="download-description">打包下载生成的所有图片</div>
           </div>   
         </div>
       </div>
@@ -244,8 +256,11 @@
          class="preview-image"
          :show-reference-option="true" />
     </div>
-    <div v-if="currentTitle === '中文生图'" class="right-bottom">
+    <div v-if="currentTitle === '中文生图' && activeTab === '文生图'" class="right-bottom">
     <TextToImage/>
+    </div>
+    <div v-if="activeTab === '图生图'" class="right-bottom">
+    <ImageToImage/>
     </div>
 </div>
   
@@ -262,7 +277,7 @@ import ImageUploader from '../components/ImageUploader.vue';
 import axiosInstance from '@/services/axiosConfig';
 
 import PreviewImage from '@/components/PreviewImage.vue';
-import ImageToImage from './ImageToImage.vue';
+import ImageToImage from '@/components/ImageToImage.vue';
 
 import { computed } from 'vue';
 import TextToImage from '../components/TextToImage.vue';
@@ -289,6 +304,11 @@ const previewVisible = ref(false);
 const selectedImageId = ref(null);
 
 const isImageUploaded = ref(false);
+const activeTab = ref('文生图');
+
+const selectTab = (tab: string) => {
+  activeTab.value = tab;
+  }
 
 // const imageId = ref();
 // const shortcutId = ref();
@@ -312,13 +332,6 @@ const activeTitle = ref<string>('快捷场景');
 
 const updateTitle = (title: string) => {
   currentTitle.value = title;
-  if (title === '中文生图') {
-    activeTitle.value = "文生图 图生文"
-  }
-
-  if(title === '快捷场景'){
-    activeTitle.value = "快捷场景"
-  } 
 };
 
 const toggleSidebar = () => {
@@ -531,10 +544,14 @@ const queryTaskStatus = async () => {
 
 //生成图片
 const generateImages = async () => {
- try { 
+  
+ if(isGenerating.value) return; // 防止重复点击
+  
   isGenerating.value = true; // 设置生成图片按钮不可点击状态
-
-  const checkTaskStatus = async () => {
+ 
+ try { 
+   
+   const checkTaskStatus = async () => {
     const isCompleted = await queryTaskStatus();
     // console.log(isCompleted)
     if (!isCompleted) {
@@ -633,13 +650,20 @@ select {
   align-items: flex-start;
   display: inline-flex;
   gap: 10px;
+  transition: width 0.3s;
+  border-right: 1px #E3E3E3 solid;
+
 }
 .sideRight {
-  flex: 1 1 0; 
+  flex: 1; 
   flex-direction: column; 
   justify-content: flex-start; 
   align-items: flex-start; 
   display: inline-flex;
+}
+
+.sideRight.expanded {
+  flex: 1 1 100%; /* 当侧边栏折叠时，让主内容区占满剩余空间 */
 }
 .right-bottom {
   /* align-self: stretch;  */
@@ -656,18 +680,25 @@ select {
   height: 100px;
   padding: 10px 20px;
   border-top-left-radius: 16px;
-  border-right: 1px #E3E3E3 solid;
   border-bottom: 1px #E3E3E3 solid;
   justify-content: space-between;
   align-items: center;
-  display: inline-flex;
-}
+  display: flex;
+  box-sizing: border-box; /* 包含内边距和边框*/
+} 
+.lefttop div {
+      /* background-color: lightgrey; 为子元素添加背景颜色以便观察布局 */
+      padding: 10px;
+      box-sizing: border-box; /* 确保内边距和边框包含在元素的总高度内 */
+    }
 
 .ComponentLogo {
   justify-content: flex-start;
   align-items: center;
   gap: 20px;
   display: flex;
+  margin: 0;
+  padding: 0;
 }
 
 .Abstract05 {
@@ -717,9 +748,10 @@ select {
   justify-content: center;
   align-items: center;
   display: flex;
+  /* margin: 0;
+  padding: 0; */
 }
 
-.SidebarLeft,
 .ComponentAbstract06,
 .DocumentText,
 .MessageText {
@@ -727,6 +759,12 @@ select {
   height: 24px;
   position: relative;
 }
+
+.SidebarLeft img {
+  width: 24px;
+  height: 24px;
+}
+
 
 .Frame_blank {
   width: 400px;
@@ -764,17 +802,21 @@ select {
   border: 1px #377DFF solid;
 }
 
-.Frame3652,
-.documentCode {
+.Frame3652 {
   border: 1px #E3E3E3 solid;
 }
 
 .Frame3649 {
-  height: 44px;
+  /* height: 44px;
   justify-content: flex-start;
   align-items: center;
-  gap: 20px;
+  gap: 20px; */
   display: flex;
+
+  width: 237px;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
 }
 
 .Frame3647 {
@@ -806,11 +848,17 @@ select {
   word-wrap: break-word;
 }
 
-.Prompt {
+.tips {
   width: 193px;
   height: 18px;
+  color: #8E8E8E; 
+  font-size: 12px; 
+  font-family: Quicksand; 
+  font-weight: 700; 
+  line-height: 22px;
+  letter-spacing: 0.12px; 
+  word-wrap: break-word;
 }
-
 .leftBottom {
   align-self: stretch;
   width:400px;
@@ -866,26 +914,29 @@ select {
 
 .right-top {
   align-self: stretch;
-  height: 80px;
+  height: 100px;
   padding: 20px;
-  /* border-top-left-radius: 16px; */
-  border-bottom: 1px #e3e3e3 solid;
   justify-content: space-between;
   align-items: center;
   display: flex;
+  border-radius: 0px 16px 0px 0px;
+  border-bottom: 1px solid #E3E3E3;
+  box-sizing: border-box; /* 包含内边距和边框 */
 }
 
 .right-top-inner {
   height: 100px;
   justify-content: flex-start;
   align-items: center;
+  /* justify-content: space-between; */
   gap: 20px;
   display: flex;
+  flex-shrink: 0;
 }
 
 .title {
   width: 65px;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 10px;
   display: flex;
@@ -905,6 +956,8 @@ select {
   align-items: center;
   gap: 10px;
   display: flex;
+  width: 160px;
+  flex-shrink: 0;
 }
 
 .Frame1000003526 {
@@ -941,7 +994,7 @@ select {
 /**right-bottom */
  .middle {
    width: 300px;
-   height: 1016px; 
+   height: 1180px; 
    padding-top: 20px; 
    padding-bottom: 20px; 
    background: #FCFCFC; 
@@ -950,7 +1003,8 @@ select {
    align-items: center; 
    gap: 20px; 
    display: inline-flex;
-   border-left: 1px #E3E3E3 solid;
+   /* border-left: 1px #E3E3E3 solid; */
+   box-sizing: border-box;
 }
 .sence{
   width: 260px; 
@@ -1014,51 +1068,50 @@ select {
 }
 
 /**左侧边栏样式 */
-.sideLeft {
+/* .sideLeft {
   transition: width 0.3s;
   border-right: 1px #E3E3E3 solid;
   width: 400px;
-}
+} */
 
 .sideLeft.collapsed {
-  width: 60px; /* 只显示图标时的宽度 */
+  width: 80px; /* 只显示图标时的宽度 */
+  height: 100px;
 }
 
 .SidebarItem {
   display: flex;
   align-items: center;
   padding: 10px;
+
 }
 
 .SidebarItem img {
   margin-right: 10px;
 }
 
-.SidebarItem .description {
+.SidebarItem {
   display: none;
 }
 
-.sideLeft:not(.collapsed) .SidebarItem .description {
+.sideLeft:not(.collapsed) .SidebarItem .description .documentCode .code2image{
   display: block;
 }
-
+/* 
 .documentCode {
   padding: 10px;
-}
+} */
 
 .documentCode img {
   display: block;
   margin: 0 auto;
 }
 
-.documentCode .code2image {
+.code2image {
   display: none;
 }
 
-.sideLeft:not(.collapsed) .documentCode .code2image {
-  display: block;
-}
-/** 右下*/
+/** 提示词输入*/
 textarea {
   font-size: 16px;
   font-family: Arial, sans-serif;
@@ -1081,7 +1134,7 @@ textarea {
 /**生成图片区域 */
 
 .sideright2 {
-  width: 100%;
+  width:calc(96% - 300px); /* 减去 .middle 的宽度 */
   transition: width 0.3s ease;
   /* flex: 1; */
   height: 65%;
@@ -1091,7 +1144,7 @@ textarea {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  display: inline-flex;
+  display: flex;
 }
 
 .sideright2.expanded {
@@ -1121,7 +1174,7 @@ textarea {
   gap: 10px;
   display: flex;
 }
-.Frame3659 {
+.prompt-frame {
   align-self: stretch;
   justify-content: space-between;
   align-items: center;
@@ -1196,9 +1249,11 @@ textarea {
   align-items: flex-start;
   gap: 10px;
   display: flex;
+  width: 100%;
+
 }
 .Frame3662 {
-  width: 828px;
+  width: 100%;
   justify-content: flex-start;
   align-items: center;
   gap: 10px;
@@ -1285,6 +1340,8 @@ textarea {
   justify-content: space-between;
   align-items: center;
   display: inline-flex;
+  height: 18px;
+  width: 100%;
 }
 .creative-label,
 .relevance-label {
@@ -1370,10 +1427,15 @@ textarea {
   gap: 10px;
   /* flex-shrink: 0; */
   display: flex;
-  /* margin-top: auto; 将 Frame3 推到父容器的底部 */
+  margin-top: auto; /*将 Frame3 推到父容器的底部*/
+  cursor: pointer;
+  transition: background-color 0.3s;
 
 }
 .generate-button {
+  position: relative;
+  bottom: 0;
+  left: 0;
   color: white;
   font-size: 16px;
   font-family: Quicksand;
@@ -1381,11 +1443,14 @@ textarea {
   line-height: 24px;
   letter-spacing: 0.16px;
   word-wrap: break-word;
-  cursor: pointer;
+ 
+
 }
-.generate-button.disabled {
+.Frame3.disabled {
   opacity: 0.5; /* 降低透明度以显示禁用状态 */
   pointer-events: none; /* 禁用点击事件 */
+  background-color:gray;
+  cursor: not-allowed;
 }
 
 .imageList {
@@ -1468,7 +1533,7 @@ textarea {
   flex-direction: column;
 }
 
-.description {
+.download-description {
   width: 142px;
   color: #8E8E8E;
   font-size: 12px;
@@ -1493,5 +1558,35 @@ textarea {
 .ProgressBar {
   width: 100%; /* 确保填充父容器宽度 */
   box-sizing: border-box; /* 确保 padding 和 border 包含在元素的总宽度内 */
+}
+/**顶部tab */
+.tabs-container {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1rem;
+  background-color: white;
+  border-radius: 8px;
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: normal;
+  color: #8E8E8E;
+  border-bottom: 2px solid transparent;
+  transition: color 0.3s, border-bottom 0.3s;
+  font-family: Nunito;
+  font-size: 16px;
+  font-style: normal;
+  cursor: pointer;
+  height: 100px;
+  justify-content: center; /* 文字居中 */
+
+}
+
+.tab.active {
+  font-weight: bold;
+  color: #000;
+  border-bottom: 2px solid #377DFF ;
 }
 </style>
