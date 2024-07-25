@@ -1,5 +1,5 @@
 <template>
-<div class="Frame3658" style=" height: 1017px; background: #FCFCFC; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+<div class="Frame3658" style="width:100%; height: 100vh; background: #FCFCFC; justify-content: flex-start; align-items: flex-start; display: inline-flex">
   <div class="setting">
     <div class="setup">
       <div class="prompt">
@@ -20,8 +20,9 @@
             <div class="title">反向提示词</div>
             <div class="help-icon">
               <img src="../assets/help.png">
+              <div class="tooltip">描述不希望出现的元素或风格，来避免生成这些内容。</div>
             </div>
-            <div class="tooltip">描述不希望出现的元素或风格，来避免生成这些内容。</div>
+      
           </div>
           <div class="text-count">{{ imKeywordsInput.length }}/1000</div>
         </div>
@@ -77,7 +78,7 @@
         <div class="Frame1000003490">
           <div class="Frame1000003524">
             <div class="title">迭代步数</div>
-            <div class="mid-mid-mid-description">迭代步数越多细节越多，但更消耗时间，默认值 25</div>
+            <div class="mid-description">迭代步数越多细节越多，但更消耗时间，默认值 25</div>
           </div>
           <div class="Frame1000003489">
             <div class="Frame1000003487">
@@ -137,13 +138,13 @@
   </div>
   <div class="image-list-area"  
        :class="{ 'expanded': previewVisible }">
-   <div  v-if="!generatedImages.length" class="dotted-frame">
+      <div  v-if="!generatedImages.length" class="dotted-frame">
     <div class="SdtoolsSmell">
       <img src="../assets/smell.png">
      </div>
      <div  class="image-text">生成图片区域</div>
-    </div>
-   <div v-else class="imageList">
+       </div>
+      <div v-else class="imageList">
     <div v-if="isGenerating">正在生成图片，请稍候...</div>
     <div v-for="image in generatedImages" 
          :key="image.id" 
@@ -167,8 +168,7 @@
     </div>
     </div>
     </div>
-   </div>
- 
+       </div>
   </div> 
   <PreviewImage 
          v-if="previewVisible" 
@@ -357,6 +357,13 @@ const generateImages = async () => {
         console.log(imageList.value);
       } 
   };
+    /**任务创建失败就返回 */
+    const isTaskCreated = await createTask();
+    if (!isTaskCreated) {
+      isGenerating.value = false;
+      return;
+    }
+
   await checkTaskStatus(); // 首次调用检查任务状态
 }
   catch (error) {
@@ -415,7 +422,7 @@ const showPreview = (imageId: null,taskId:Number) => {
 <style>
 .setting {
   width: 460px;
-  height: 1017px;
+  height: flex;
   padding: 20px;
   background: white;
   border-right: 1px #E3E3E3 solid;
@@ -501,8 +508,8 @@ textarea {
   gap: 20px;
 }
 .Frame1000003487 {
-  display: flex;
-  width: 100px;
+ display: flex;
+ width: 100px;
  height: 30px;
  padding: 11px 10px;
  justify-content: space-between;
@@ -555,7 +562,7 @@ textarea {
   color: #8E8E8E;
   font-size: 12px;
   display: flex;
-  width: 382px;
+  width: 300px;
   height: 18px;
   flex-direction: column;
   justify-content: center;
@@ -613,7 +620,7 @@ textarea {
 }
 
 .dimension-input {
-  width: 50px; /* 根据需要调整输入框宽度 */
+  width: 48px; /* 根据需要调整输入框宽度 */
   height: 24px;
   font-size: 14px;
   padding: 2px 4px;
@@ -630,14 +637,14 @@ textarea {
 }
 
 .help-icon:hover .tooltip {
-  display: block;
+  display: block; /* 悬停时显示 */
 }
 
 .tooltip {
   display: none;
   position: absolute;
-  top: 25px; /* 根据需要调整 */
-  left: 50%;
+  top: -30px; /* 从 .help-icon 顶部向上偏移 */
+  right: -100px; /* 从 .help-icon 右边缘向外偏移 */
   transform: translateX(-50%);
   background-color: #333;
   color: #fff;
@@ -646,23 +653,11 @@ textarea {
   border-radius: 4px;
   white-space: nowrap;
   z-index: 10;
+  width: 300px;
 }
 
-.setting {  
-/* width: 460px;  */
-  height: 1017px; 
-  padding: 20px; 
-  background: white; 
-  border-right: 1px #E3E3E3 solid; 
-  flex-direction: column; 
-  justify-content: space-between; 
-  align-items: center;
-   display: inline-flex;
- }
-
-
  .image-list-area {
-  width: 808px;
+  width: calc(100% - 460px);
   height: 1017px;
   padding: 20px;
   background: #FCFCFC;
@@ -674,7 +669,7 @@ textarea {
 }
 
 .dotted-frame {
-  width: 768px;
+  width: 100%;
   height: 975px;
   padding: 20px;
   mix-blend-mode: multiply;

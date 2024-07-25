@@ -1,5 +1,5 @@
 <template>
-<div class="Frame3658" style=" height: 1017px; background: #FCFCFC; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+<div class="Frame3658" style="width:100%; height: 100vh; background: #FCFCFC; justify-content: flex-start; align-items: flex-start; display: inline-flex">
   <div class="setting">
     <div class="setup">
       <div class="ImageP">
@@ -31,8 +31,8 @@
             <div class="title">反向提示词</div>
             <div class="help-icon">
               <img src="../assets/help.png">
+              <div class="tooltip">描述不希望出现的元素或风格，来避免生成这些内容。</div>
             </div>
-            <div class="tooltip">描述不希望出现的元素或风格，来避免生成这些内容。</div>
           </div>
           <div class="text-count">{{ imKeywordsInput.length }}/1000</div>
         </div>
@@ -69,7 +69,12 @@
             <div class="dimension">
               <input type="number" 
                      class="dimension-input"
-                     v-model="width">
+                     v-model="width"
+                     @input="validateInput('width')"
+                     :class="{ 'error': isWidthInvalid }"
+                     >
+                  <p v-if="isWidthInvalid" class="error-message">仅可输入1～1024之间的整数</p>
+
             </div>
           </div>
           <div class="Frame1000003487">
@@ -77,9 +82,16 @@
               <img src="../assets/hight.png">
             </div>
             <div class="dimension">
-              <input type="number" 
-                     class="dimension-input"
-                     v-model="height">
+              <input 
+                type="number"
+                class="dimension-input"
+                 v-model="height" 
+               @input="validateInput('height')"
+               :class="{ 'error': isHeightInvalid }"
+               />
+              <div v-if="isHeightInvalid" class="error-message">
+                 仅可输入1～1024之间的整数
+              </div>
             </div>
           </div>
         </div>
@@ -88,7 +100,7 @@
         <div class="Frame1000003490">
           <div class="Frame1000003524">
             <div class="title">迭代步数</div>
-            <div class="mid-mid-mid-description">迭代步数越多细节越多，但更消耗时间，默认值 25</div>
+            <div class="mid-description">迭代步数越多细节越多，但更消耗时间，默认值 25</div>
           </div>
           <div class="Frame1000003489">
             <div class="Frame1000003487">
@@ -98,7 +110,13 @@
               <div class="dimension">
                 <input type="number" 
                        class="dimension-input"
-                       v-model="steps">
+                       v-model="steps"
+                       @input="validateInput('steps')"
+                    :class="{ 'error': isStepsInvalid }"
+                    />
+                <div v-if="isStepsInvalid" class="error-message">
+                 仅可输入1～100之间的整数
+                </div>
               </div>
             </div>
           </div>
@@ -149,7 +167,13 @@
               <div class="dimension">
                 <input type="number" 
                         class="dimension-input"
-                        v-model="seed">
+                        v-model="seed"
+                        @input="validateInput('seed')"
+                        :class="{ 'error': isSeedInvalid }"
+                      />
+              <div v-if="isSeedInvalid" class="error-message">
+               仅可输入0～4,294,967,295之间的整数
+               </div>
               </div>
             </div>
           </div>
@@ -210,7 +234,7 @@
 </template>
 <script setup lang="ts">
 
-import { ref } from 'vue';
+import { ref,watch } from 'vue';
 import { useToast } from 'vue-toastification';
 import ProgressBar from './ProgressBar.vue'; 
 import { setMapStoreSuffix } from 'pinia';
@@ -306,6 +330,35 @@ const height = ref<number>(512);
 const steps = ref<number>(25);
 const seed = ref<number>(-1);
 const name = ref(generateRandomString(5));
+//width输入校验
+
+const isWidthInvalid = ref(false);
+const isHeightInvalid = ref(false);
+const isStepsInvalid = ref(false);
+const isSeedInvalid = ref(false);
+
+const validateInput = (type: string) => {
+  switch (type) {
+    case 'width':
+      isWidthInvalid.value = width.value < 1 || width.value > 1024;
+      break;
+    case 'height':
+      isHeightInvalid.value = height.value < 1 || height.value > 1024;
+      break;
+    case 'steps':
+      isStepsInvalid.value = steps.value < 1 || steps.value > 100;
+      break;
+    case 'seed':
+      isSeedInvalid.value = seed.value < 0 || seed.value > 4294967295;
+      break;
+  }
+};
+
+// 监听 width、height、steps 和 seed 值的变化
+watch(width, () => validateInput('width'));
+watch(height, () => validateInput('height'));
+watch(steps, () => validateInput('steps'));
+watch(seed, () => validateInput('seed'));
 
 //生成随机字符串
 function generateRandomString(length: number): string {  
@@ -608,14 +661,13 @@ textarea {
   color: #8E8E8E;
   font-size: 12px;
   display: flex;
-  width: 382px;
+  width: flex;
   height: 18px;
   flex-direction: column;
   justify-content: center;
   flex-shrink: 0;
   font-family: Nunito;
   font-style: normal;
-  /* font-weight: 700; */
   text-transform: capitalize;
 }
 .text-count {
@@ -662,7 +714,7 @@ textarea {
   display: flex;
   align-items: center;
   height: 30px;
-
+  position: relative;
 }
 
 .dimension-input {
@@ -673,8 +725,22 @@ textarea {
   border: 1px solid transparent;
   border-radius: 4px;
   text-align: center;
-
 }
+
+.dimension-input.error {
+  border-color: red; /* 输入框边框变红 */
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  width:200px;
+  height: 20px;
+  position: absolute;
+  bottom: -30px;
+  left: -20px;
+}
+
 .help-icon {
   width: 16px;
   height: 16px;
@@ -703,7 +769,7 @@ textarea {
 
 .setting {  
 /* width: 460px;  */
-  height: 1017px; 
+  height: flex;
   padding: 20px; 
   background: white; 
   border-right: 1px #E3E3E3 solid; 

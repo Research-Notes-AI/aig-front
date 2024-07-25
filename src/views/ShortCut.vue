@@ -1,5 +1,5 @@
 <template>
-<!-- <div class="ShortcutIndex" style="width: 100%; height: flex; background: white; box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.30); border-radius: 16px; border: 1px #B0B0B0 solid; justify-content: flex-start; align-items: flex-start; display: inline-flex"> -->
+<div class="container">
   <div :class="['sideLeft', { collapsed: isCollapsed } ]">
     <div class="lefttop" >
       <div class="ComponentLogo" v-if="!isCollapsed">
@@ -44,7 +44,7 @@
               <div class="tips">用英文Prompt与完整参数生成图片</div>
             </div>
           </div>
-          <div v-if="!isCollapsed">建设中</div>
+          <div v-if="!isCollapsed" >建设中</div>
         </div>    
               
       </div>
@@ -80,7 +80,7 @@
       </div>
     </div>
   </div>
-  <div class="['sideRight', { expanded: isCollapsed } ]" >
+  <div :class="['sideRight', { expanded: isCollapsed } ]" >
     <div class="right-top">
     <div class="right-top-inner">
       
@@ -128,7 +128,7 @@
           </div>
        </div>
       </div>
-      <div class="sideright2" :class="{ 'expanded': previewVisible }">
+      <div class="sideright2" :class="{ 'expanded': !previewVisible }">
       <div class="Frame3666">
       <div class="prompt">
         <div class="prompt-frame">
@@ -159,7 +159,7 @@
           </div>
         </div>
       </div>
-      <div class="simKeyword">
+      <!-- <div class="simKeyword">
         <div class="Frame3662">
           <div class="text-label">图片与提示词的相关性</div>
         </div>
@@ -168,13 +168,13 @@
           id="keywordsRelevance" 
            class="ProgressBar" 
            :selectedPercentage="keywordsRelevance"
-           @update:selectedPercentage="updateSelectedPercentage"
+           @update:selectedPercentage="updateKeywordsRelevance"
            />
         <div class="Frame3660">
           <div class="creative-label">更有创意</div>
           <div class="relevance-label">更贴近提示词</div>
         </div>
-      </div>
+      </div> -->
       <div class="ImageP">
         <div class="Frame3647">
           <div class="text-label">上传参考图片</div>
@@ -194,7 +194,7 @@
         :class="{ 'expanded': previewVisible }" 
         id="imageRelevance" 
         :selectedPercentage="imageRelevance"
-        @update:selectedPercentage="updateSelectedPercentage" 
+        @update:selectedPercentage="updateImageRelevance" 
         class="ProgressBar"/>
         <div class="Frame3660">
           <div class="creative-label">更有创意</div>
@@ -259,12 +259,12 @@
     <div v-if="currentTitle === '中文生图' && activeTab === '文生图'" class="right-bottom">
     <TextToImage/>
     </div>
-    <div v-if="activeTab === '图生图'" class="right-bottom">
+    <div v-if="currentTitle === '中文生图' && activeTab === '图生图'" class="right-bottom">
     <ImageToImage/>
     </div>
 </div>
   
-<!-- </div> -->
+</div>
 </template>
 
 <script setup lang="ts">
@@ -371,7 +371,7 @@ const imageRelevance = ref(0.8);
 const updateKeywordsRelevance = (value: number) => {
   keywordsRelevance.value = value;
 };
-const updateimageRelevance = (value: number) => {
+const updateImageRelevance = (value: number) => {
   imageRelevance.value = value;
 };
 
@@ -569,6 +569,12 @@ const generateImages = async () => {
         console.log(imageList.value);
       } 
   };
+  /**任务创建失败就返回 */
+   const isTaskCreated = await createTask();
+    if (!isTaskCreated) {
+      isGenerating.value = false;
+      return;
+    }
   await checkTaskStatus(); // 首次调用检查任务状态
 }
   catch (error) {
@@ -634,6 +640,13 @@ onMounted(() => {
 </script>
 
 <style> 
+.container {
+  width: 100%;
+  align-items:flex-start;
+  height: 100vh; 
+  display: flex; 
+  /* overflow-x: hidden; 禁用容器的水平滚动 */
+}
 select {
   /* margin-top: 2px; */
   /* padding: 2px; */
@@ -648,25 +661,27 @@ select {
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  display: inline-flex;
-  gap: 10px;
   transition: width 0.3s;
   border-right: 1px #E3E3E3 solid;
-
+  width: 400px; 
+  height: 100vh;
 }
 .sideRight {
-  flex: 1; 
+  flex-grow: 1;
+  width:calc(100% - 400px);
   flex-direction: column; 
   justify-content: flex-start; 
   align-items: flex-start; 
-  display: inline-flex;
+  display: flex;
+  box-sizing: border-box; /* 包含内边距和边框 */
 }
 
 .sideRight.expanded {
-  flex: 1 1 100%; /* 当侧边栏折叠时，让主内容区占满剩余空间 */
+  width:calc(100% - 80px);
+  display: flex;
 }
 .right-bottom {
-  /* align-self: stretch;  */
+
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
@@ -686,11 +701,11 @@ select {
   display: flex;
   box-sizing: border-box; /* 包含内边距和边框*/
 } 
-.lefttop div {
+/* .lefttop div {
       /* background-color: lightgrey; 为子元素添加背景颜色以便观察布局 */
-      padding: 10px;
+      /* padding: 10px;
       box-sizing: border-box; /* 确保内边距和边框包含在元素的总高度内 */
-    }
+   /* } */
 
 .ComponentLogo {
   justify-content: flex-start;
@@ -768,11 +783,12 @@ select {
 
 .Frame_blank {
   width: 400px;
-  height: 1016px;
+  height: calc(100% - 100px);
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   display: flex;
+  position: relative;
 }
 
 .leftMid {
@@ -862,11 +878,13 @@ select {
 .leftBottom {
   align-self: stretch;
   width:400px;
-  height: 240px;
+  /* height: 240px; */
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
   display: flex;
+  position:fixed;
+  bottom: 0px;
 }
 
 .Frame1000003507,
@@ -1108,7 +1126,7 @@ select {
 }
 
 .code2image {
-  display: none;
+  display: block;
 }
 
 /** 提示词输入*/
@@ -1118,7 +1136,7 @@ textarea {
   resize: vertical;
   align-self: stretch;
   height: 80px; 
-  width:95%;
+  width:100%;
   padding-left:20px; 
   padding-right:20px; 
   padding-top: 10px; /* 添加此行以设置上边距 */
@@ -1134,10 +1152,9 @@ textarea {
 /**生成图片区域 */
 
 .sideright2 {
-  width:calc(96% - 300px); /* 减去 .middle 的宽度 */
+  width:calc(100% - 760px); /*减去 .middle 和.preview 的宽度 */
+  flex-grow: 1; /* 第二列在默认情况下占据剩余空间 */
   transition: width 0.3s ease;
-  /* flex: 1; */
-  height: 65%;
   padding: 20px;
   background: #fcfcfc;
   border-top-left-radius: 16px;
@@ -1148,15 +1165,14 @@ textarea {
 }
 
 .sideright2.expanded {
-  width: 35%;
-  /* flex: 0;
-  transition: width 0.3s ease; */
-
+  /* flex-grow: 2; 当第三列隐藏时，第二列扩展 */
+  width:calc(100% - 300px); /*减去 .middle 的宽度 */
+  transition: width 0.3s ease; 
 }
 .Frame3666 {
   align-self: stretch;
-  width: 100%;
-  height: 100%;
+  /* width: 100%;
+  height: 100%; */
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
@@ -1417,7 +1433,7 @@ textarea {
   border-radius: 4px;
 }
 .Frame3 {
-  width: 90%;
+  width: 100%;
   height: 60px;
   padding: 12px 50px;
   background: #377dff;
@@ -1430,11 +1446,12 @@ textarea {
   margin-top: auto; /*将 Frame3 推到父容器的底部*/
   cursor: pointer;
   transition: background-color 0.3s;
+  position: relative;
 
 }
 .generate-button {
-  position: relative;
-  bottom: 0;
+  position: fiexd;
+  bottom: 0px;
   left: 0;
   color: white;
   font-size: 16px;
@@ -1481,7 +1498,7 @@ textarea {
   bottom: 20px; /* 距离底部的距离，根据需要调整 */
 }
 .download {
-  width: 360px;
+  width: 40%;
   height: 60px; 
   padding-left: 20px; 
   padding-right: 20px; 
@@ -1496,7 +1513,7 @@ textarea {
 }
 
 .regen {
-  width: 360px;
+  width: 40%;
   height: 60px; 
   padding-left: 20px; 
   padding-right: 20px; 
@@ -1562,10 +1579,11 @@ textarea {
 /**顶部tab */
 .tabs-container {
   display: flex;
-  justify-content: space-around;
-  margin-bottom: 1rem;
+  justify-content: center;
+  /* margin-bottom: 1rem; */
   background-color: white;
   border-radius: 8px;
+  height:100px;
 }
 
 .tab {
@@ -1580,8 +1598,10 @@ textarea {
   font-style: normal;
   cursor: pointer;
   height: 100px;
-  justify-content: center; /* 文字居中 */
+  display: flex; /* 确保使用 Flexbox 布局 */
 
+  justify-content: center; /* 文字水平居中 */
+  align-items: center; 
 }
 
 .tab.active {

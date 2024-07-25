@@ -4,7 +4,7 @@
             <div class="Frame1000003591"></div>
             <div class="Frame1000003588">
               <div class="Frame1000003587">
-              <div class="percentage-label" :style="percentageStyle" >{{ localSelectedPercentage }}%</div>
+              <div class="percentage-label" >{{ localSelectedPercentage }}%</div> 
               </div>
             </div>
             <div class="Frame1000003592"></div>
@@ -13,24 +13,24 @@
             <!--进度条-->
             <div class="progress-bar">
               <div class="progress-container" >
-            <div
+               <div
                v-for="step in steps"
                :key="step"
                :class="['progress-step', { selected: step <= localSelectedPercentage }]"
                @click="selectPercentage(step)"
-             ></div>
-             <div class="step-indicator"></div>
-          </div>
-            </div>
-            <div class="Frame24">
-              <div class="Bg"></div>
-            </div>
+               ></div>
+              <div class="step-indicator"></div>
+               </div>
+               </div>
+               <div class="Frame24">
+               <div class="Bg"></div>
+              </div>
           </div>
         </div>
 </template>
 
 <script setup lang="ts">
-import { ref,computed,defineEmits,defineProps } from 'vue';
+import { ref,watch,computed,defineEmits,defineProps } from 'vue';
 
 const props = defineProps({
   selectedPercentage: {
@@ -50,13 +50,17 @@ const selectPercentage = (step: number) => {
   emit('update:selectedPercentage', step);
 };
 
-// watch(() => props.selectedPercentage, (newVal) => {
-//   localSelectedPercentage.value = newVal;
-// });
+watch(() => props.selectedPercentage, (newVal) => {
+  localSelectedPercentage.value = newVal;
+});
 
-const percentageStyle = computed(() => ({
-  left: `calc(${localSelectedPercentage.value}% - 20px)` // 调整位置使其居中
-}));
+const progressColor = computed(() => {  
+  return localSelectedPercentage.value === 10 ? 'blue' : 'gray';  
+});  
+
+// const percentageStyle = computed(() => ({
+//   left: `calc(${localSelectedPercentage.value}% - 20px)` // 调整位置使其居中
+// }));
 
 // const highlightBoxStyle = computed(() => ({
 //   left: `calc(${localSelectedPercentage.value}% - 10px)` // 调整位置使其居中
@@ -96,30 +100,23 @@ const percentageStyle = computed(() => ({
 }
 
 .progress-step {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 2px;
+  width: 30px;
+  height: 30px;
+  margin: 0 5px;
+  background-color: grey;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  position: relative; /* 以便使用 z-index 确保步骤在进度条之上 */  
+  z-index: 1; 
 }
 
-.step-indicator {
-  width: 2px;
-  height: 8px;
-  background-color: gray;
-  border-radius: 1px;
+.progress-step.selected {
+  background-color: blue;
 }
 
-.step-indicator .progress-step{
-  background-color: #377dff;
-}
-
-.step-indicator.selected{
-  background-color: #377dff;
+.percentage-display {
+  font-size: 1.2em;
+  font-weight: bold;
 }
 .relativity {
   align-self: stretch;
@@ -137,13 +134,13 @@ const percentageStyle = computed(() => ({
   gap: 10px;
   display: inline-flex;
 }
-.Frame1000003591 {
-  width: 661px;
+.Frame1000003591 .Frame1000003592{
+  width: 100%;
   height: 28px;
   position: relative;
 }
 .Frame1000003588 {
-  width: 38px;
+  width: 30%;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -151,6 +148,7 @@ const percentageStyle = computed(() => ({
 }
 .Frame1000003587 {
   align-self: stretch;
+  width:50px;
   padding: 6px;
   background: #377dff;
   border-radius: 4px;
@@ -170,19 +168,23 @@ const percentageStyle = computed(() => ({
   letter-spacing: 0.12px;
   word-wrap: break-word;
 }
+.step-indecator{
+  position: relative;
+
+}
 .Frame24 {
   width: 39.13px;
   height: 20px;
   left: 670.08px;
   top: 0px;
-  position: absolute;
+  position: relative;
 }
 .Bg {
   width: 8px;
   height: 20px;
   left: 16px;
   top: 0px;
-  position: absolute;
+  position: relative;
   background: white;
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
   border-radius: 5px;
