@@ -40,7 +40,7 @@
     <div class="Line"></div>
     <div class="Frame1000003518">
       <div class="label">生成方式</div>
-      <div class="value">快捷场景 / 2010 华北旧室内配电箱 </div>
+      <div class="value">{{ currentTitle }} / {{ senceSubTitle }} </div>
     </div>
     <div class="Line"></div>
     <div class="Frame1000003521">
@@ -99,10 +99,13 @@ const props = defineProps<{
   imageId: string;
   shortcutId: string;
   imageUrl: string;
-  showReferenceOption: boolean;
+  showReferenceOption: boolean;  
+  currentTitle: string;
+  senceSubTitle: string;
 }>();
 
-
+console.log(props.currentTitle);
+console.log(props.senceSubTitle);
 
 //下载图片
 const downloadImage = async (imageId: Number, filename: string) => {

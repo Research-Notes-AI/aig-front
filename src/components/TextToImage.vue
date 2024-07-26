@@ -59,7 +59,12 @@
             <div class="dimension">
               <input type="number" 
                      class="dimension-input"
-                     v-model="width">
+                     v-model="width"
+                     @input="validateInput('width')"
+                     :class="{ 'error': isWidthInvalid }"
+                     >
+                  <p v-if="isWidthInvalid" class="error-message">仅可输入1～1024之间的整数</p>
+
             </div>
           </div>
           <div class="Frame1000003487">
@@ -67,9 +72,16 @@
               <img src="../assets/hight.png">
             </div>
             <div class="dimension">
-              <input type="number" 
-                     class="dimension-input"
-                     v-model="height">
+              <input 
+                type="number"
+                class="dimension-input"
+                 v-model="height" 
+               @input="validateInput('height')"
+               :class="{ 'error': isHeightInvalid }"
+               />
+              <div v-if="isHeightInvalid" class="error-message">
+                 仅可输入1～1024之间的整数
+              </div>
             </div>
           </div>
         </div>
@@ -88,7 +100,13 @@
               <div class="dimension">
                 <input type="number" 
                        class="dimension-input"
-                       v-model="steps">
+                       v-model="steps"
+                       @input="validateInput('steps')"
+                    :class="{ 'error': isStepsInvalid }"
+                    />
+                <div v-if="isStepsInvalid" class="error-message">
+                 仅可输入1～100之间的整数
+                </div>
               </div>
             </div>
           </div>
@@ -123,7 +141,13 @@
               <div class="dimension">
                 <input type="number" 
                         class="dimension-input"
-                        v-model="seed">
+                        v-model="seed"
+                        @input="validateInput('seed')"
+                        :class="{ 'error': isSeedInvalid }"
+                      />
+              <div v-if="isSeedInvalid" class="error-message">
+               仅可输入0～4,294,967,295之间的整数
+               </div>
               </div>
             </div>
           </div>
@@ -177,18 +201,25 @@
          @imageDeleted="handleImageDeleted" 
          :taskDetail="taskDetail"
          class="preview-image"
+         :currentTitle="currentTitle"
+         :senceSubTitle="senceSubTitle"
          :show-reference-option="false"
           />  
  </div>
 </template>
 <script setup lang="ts">
 
-import { ref } from 'vue';
+import { ref,defineProps,watch } from 'vue';
 import { useToast } from 'vue-toastification';
 import ProgressBar from './ProgressBar.vue'; 
 import { setMapStoreSuffix } from 'pinia';
 import axiosInstance from '@/services/axiosConfig';
 import PreviewImage from '@/components/PreviewImage.vue';
+
+const props = defineProps({
+  currentTitle: String,
+  senceSubTitle: String
+});
 
 
 const toast = useToast();
@@ -257,7 +288,37 @@ const steps = ref<number>(25);
 const seed = ref<number>(-1);
 const name = ref(generateRandomString(5));
 
-//生成随机字符串
+//设置输入校验
+const isWidthInvalid = ref(false);
+const isHeightInvalid = ref(false);
+const isStepsInvalid = ref(false);
+const isSeedInvalid = ref(false);
+
+const validateInput = (type: string) => {
+  switch (type) {
+    case 'width':
+      isWidthInvalid.value = width.value < 1 || width.value > 1024;
+      break;
+    case 'height':
+      isHeightInvalid.value = height.value < 1 || height.value > 1024;
+      break;
+    case 'steps':
+      isStepsInvalid.value = steps.value < 1 || steps.value > 100;
+      break;
+    case 'seed':
+      isSeedInvalid.value = seed.value < 0 || seed.value > 4294967295;
+      break;
+  }
+};
+
+// 监听 width、height、steps 和 seed 值的变化
+watch(width, () => validateInput('width'));
+watch(height, () => validateInput('height'));
+watch(steps, () => validateInput('steps'));
+watch(seed, () => validateInput('seed'));
+
+
+//生成随机字符串 Todo :deleted
 function generateRandomString(length: number): string {  
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';  
   let result = '';  
@@ -336,6 +397,7 @@ const queryTaskStatus = async () => {
 //生成图片
 const generateImages = async () => {
  try { 
+  if(isGenerating.value) return; // 防止重复点击
   isGenerating.value = true; // 设置生成图片按钮不可点击状态
 
   const checkTaskStatus = async () => {
@@ -354,7 +416,9 @@ const generateImages = async () => {
         generatedImages.value = response.data.data; // 返回的数据中包含图片数组
 
         imageList.value = generatedImages.value.map(image => image.id).join(',');
-        console.log(imageList.value);
+        isGenerating.value = false; // 恢复生成图片按钮可点击状态
+        
+
       } 
   };
     /**任务创建失败就返回 */
@@ -363,6 +427,7 @@ const generateImages = async () => {
       isGenerating.value = false;
       return;
     }
+    
 
   await checkTaskStatus(); // 首次调用检查任务状态
 }
@@ -591,6 +656,7 @@ textarea {
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 }
 .generate-button {
   color: white;
@@ -603,9 +669,11 @@ textarea {
   font-family: Quicksand;
 }
  
-.generate-button.disabled {
+.generateImage.disabled {
   opacity: 0.5; /* 降低透明度以显示禁用状态 */
   pointer-events: none; /* 禁用点击事件 */
+  background-color:gray;
+  cursor: not-allowed;
 }
  
 .input-error {

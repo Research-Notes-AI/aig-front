@@ -2,7 +2,7 @@
 <div class="Frame3658" style="width:100%; height: 100vh; background: #FCFCFC; justify-content: flex-start; align-items: flex-start; display: inline-flex">
   <div class="setting">
     <div class="setup">
-      <div class="ImageP">
+      <div :class="['imageP', { 'input-error': !isImageUploaded }]" >
         <div class="image-frame">
           <div class="text-label">参考图片</div>
           <div class="reference-description">上传后会生成与参考图片相似的图片</div>
@@ -228,13 +228,15 @@
          @imageDeleted="handleImageDeleted" 
          :taskDetail="taskDetail"
          class="preview-image"
+         :currentTitle="currentTitle"
+         :senceSubTitle="senceSubTitle"
          :show-reference-option="true"
           />  
  </div>
 </template>
 <script setup lang="ts">
 
-import { ref,watch } from 'vue';
+import { ref,watch ,defineProps} from 'vue';
 import { useToast } from 'vue-toastification';
 import ProgressBar from './ProgressBar.vue'; 
 import { setMapStoreSuffix } from 'pinia';
@@ -244,12 +246,16 @@ import ImageUploader from './ImageUploader.vue';
 
 
 const toast = useToast();
+const props = defineProps({
+  currentTitle: String,
+  senceSubTitle: String
+});
 
 const keywordsInput = ref<string>('');
 const imKeywordsInput = ref<string>('');
 const isGenerating = ref(false); // 控制生成图片按钮是否可点击的状态
 
-const isImageUploaded = ref(false);
+const isImageUploaded = ref(false); //图片上传状态
 const uploadedImageId = ref<Number | null>(null);
 const imageUrl = ref<string | null>(null); // 用于传递给 ImageUploader.vue 的图标
 const uploadedImageUrl = ref<string | null>(null);
@@ -262,6 +268,8 @@ const updateText = (event: Event) => {
   text.value = target.value;
 };
 const isKeywordInputEmpty = ref(false);//提示词输入状态
+
+
 
 /*图片数量*/
 
@@ -314,11 +322,11 @@ const imageList = ref<string | null>(null);
 
 //上传成功事件动作
 const handleUploadSuccess = (imageId: Number) => {
-  isImageUploaded.value = true;
+ 
   uploadedImageId.value = imageId;
   uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageId}`; //更新图标
   imageUrl.value = uploadedImageUrl.value; // 更新图标
-  console.log(imageUrl.value);
+  isImageUploaded.value = true; //图片上传成功
 
 }; 
 
@@ -330,8 +338,8 @@ const height = ref<number>(512);
 const steps = ref<number>(25);
 const seed = ref<number>(-1);
 const name = ref(generateRandomString(5));
-//width输入校验
 
+//设置输入校验
 const isWidthInvalid = ref(false);
 const isHeightInvalid = ref(false);
 const isStepsInvalid = ref(false);
@@ -374,13 +382,19 @@ function generateRandomString(length: number): string {
 // 创建任务并获取任务ID
 const createTask = async () => {
   try {
+    /** 提示词为必填项 */
     if (!keywordsInput.value.trim()) {
     isKeywordInputEmpty.value = true;
-    toast.info("请输入提示词");
+    toast.error("请输入提示词");
     return false;
      }
      isKeywordInputEmpty.value = false;
-   
+    /**图片为必传项 */
+     if (!isImageUploaded.value){
+      toast.error("请上传参考图片");
+      return false;
+     }
+
     const params = {
         task_type: task_type.value, // 任务类型为文生图
         prompt: keywordsInput.value,
@@ -442,6 +456,7 @@ const queryTaskStatus = async () => {
 //生成图片
 const generateImages = async () => {
  try { 
+  if(isGenerating.value) return; // 防止重复点击
   isGenerating.value = true; // 设置生成图片按钮不可点击状态
 
   const checkTaskStatus = async () => {
@@ -460,9 +475,17 @@ const generateImages = async () => {
         generatedImages.value = response.data.data; // 返回的数据中包含图片数组
 
         imageList.value = generatedImages.value.map(image => image.id).join(',');
-        console.log(imageList.value);
+        isGenerating.value = false; // 恢复生成图片按钮可点击状态        
+
       } 
   };
+    /**任务创建失败就返回 */
+    const isTaskCreated = await createTask();
+    if (!isTaskCreated) {
+      isGenerating.value = false;
+      return;
+    }
+
   await checkTaskStatus(); // 首次调用检查任务状态
 }
   catch (error) {
@@ -472,7 +495,6 @@ const generateImages = async () => {
     isGenerating.value = false; // 恢复生成图片按钮可点击状态
   }
 };
-
 /*下载所有图片*/
 const downloadAllImages = async (filename: string) => {
   // 实现下载所有生成图片的逻辑
@@ -557,7 +579,7 @@ textarea {
   gap: 113px; 
   display: inline-flex;
 }
-.imageP, .prompt, .imprompt, .steps, .seeds {
+.prompt, .imprompt, .steps, .seeds {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -842,5 +864,17 @@ textarea {
   gap: 2px;  
   background: #FCFCFC;
 
+}
+
+.imageP {
+  align-self: stretch;
+  height: 100px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px #e5e5e5 solid;
+  justify-content: space-between;
+  align-items: center;
+  display: inline-flex;
 }
  </style>

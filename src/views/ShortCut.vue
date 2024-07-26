@@ -129,7 +129,7 @@
        </div>
       </div>
       <div class="sideright2" :class="{ 'expanded': !previewVisible }">
-      <div class="Frame3666">
+      <!-- <div class="Frame3666"> -->
       <div class="prompt">
         <div class="prompt-frame">
           <div class="text-label">提示词</div>
@@ -228,21 +228,21 @@
           <img src="../assets/download.png" class="icon">
           <div class="text">
              全部下载
-             <div class="download-description">打包下载生成的所有图片</div>
+             <div class="download-desc">打包下载生成的所有图片</div>
           </div>   
         </div>
       </div>
       <div class="regen" @click="regenerateImages" :disabled="isGenerating">
         <div class="button-content" >
           <img src="../assets/edit.png" class="icon">
-          <div class="text" >
-          <div style="color: white; font-size: 16px; font-family: Nunito; font-weight: 700; text-transform: capitalize; line-height: 24px; letter-spacing: 0.16px; word-wrap: break-word">重新生成</div>
-          <div style="width: 142px; height: 18px; color: white; font-size: 12px; font-family: Quicksand; font-weight: 700; line-height: 22px; letter-spacing: 0.12px; word-wrap: break-word">修改条件重新生成图片</div>
+            <div class="regen-text" >
+             重新生成
+            <div class="regen-desc" >修改条件重新生成图片</div>
           </div>
         </div>
       </div>
     </div>
-        </div>
+        <!-- </div> -->
       </div>
       <PreviewImage 
          v-if="previewVisible" 
@@ -253,11 +253,16 @@
          :taskDetail="taskDetail"
          :shortcutId="shortcutId"
          :imageUrl="uploadedImageUrl"
+         :currentTitle="currentTitle"
+         :senceSubTitle="senceSubTitle"
          class="preview-image"
          :show-reference-option="true" />
     </div>
     <div v-if="currentTitle === '中文生图' && activeTab === '文生图'" class="right-bottom">
-    <TextToImage/>
+    <TextToImage
+         :currentTitle="currentTitle"
+         :senceSubTitle="senceSubTitle"
+     />
     </div>
     <div v-if="currentTitle === '中文生图' && activeTab === '图生图'" class="right-bottom">
     <ImageToImage/>
@@ -308,6 +313,7 @@ const activeTab = ref('文生图');
 
 const selectTab = (tab: string) => {
   activeTab.value = tab;
+  senceSubTitle = activeTab.value;
   }
 
 // const imageId = ref();
@@ -426,6 +432,7 @@ const fetchData = async () => {
 
     if (sections.value.length > 0 && sections.value[0].items.length > 0) {
       selectedItem.value = sections.value[0].items[0];
+      senceSubTitle.value =  selectedItem.value.subTitle;
       }
     // successMessage.value = '获取项目成功'
   }
@@ -443,14 +450,20 @@ const generatedImages = ref([]);
 let taskId = ref<string | null>(null);
 let taskStatus = ref<string | null>(null);
 
-let taskDetail = ref()
-let shortcutId = ref()
+let taskDetail = ref();
+let shortcutId = ref();
+let senceSubTitle = ref("");
 
 const imageList = ref<string | null>(null);
 
  //选择快捷场景
 const selectItem = (item: any) => {
-  selectedItem.value = item;
+ selectedItem.value = item;
+   if(selectedItem.value){
+   senceSubTitle = selectedItem.value.subTitle;
+ }
+ else
+  {toast.error("未选中场景！！！")}
 
 };
 
@@ -567,6 +580,8 @@ const generateImages = async () => {
 
         imageList.value = generatedImages.value.map(image => image.id).join(',');
         console.log(imageList.value);
+        isGenerating.value = false; // 恢复生成图片按钮可点击状态
+
       } 
   };
   /**任务创建失败就返回 */
@@ -1153,15 +1168,17 @@ textarea {
 
 .sideright2 {
   width:calc(100% - 760px); /*减去 .middle 和.preview 的宽度 */
-  flex-grow: 1; /* 第二列在默认情况下占据剩余空间 */
+  /* flex-grow: 1; 第二列在默认情况下占据剩余空间 */
   transition: width 0.3s ease;
   padding: 20px;
   background: #fcfcfc;
   border-top-left-radius: 16px;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
   display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 20px;
 }
 
 .sideright2.expanded {
@@ -1498,7 +1515,7 @@ textarea {
   bottom: 20px; /* 距离底部的距离，根据需要调整 */
 }
 .download {
-  width: 40%;
+  width: 45%;
   height: 60px; 
   padding-left: 20px; 
   padding-right: 20px; 
@@ -1506,14 +1523,14 @@ textarea {
   padding-bottom: 28px; 
   border-radius: 8px;
   border: 1px #377DFF solid; 
-  justify-content: space-between; 
+  justify-content: center; 
   align-items: center; 
   display: flex;
   cursor: pointer;
 }
 
 .regen {
-  width: 40%;
+  width: 45%;
   height: 60px; 
   padding-left: 20px; 
   padding-right: 20px; 
@@ -1521,7 +1538,7 @@ textarea {
   padding-bottom: 28px; 
   border-radius: 8px;
   border: 1px #377DFF solid; 
-  justify-content: space-between; 
+  justify-content: center; 
   align-items: center; 
   display: flex;
   background: #0179FC;
@@ -1550,7 +1567,29 @@ textarea {
   flex-direction: column;
 }
 
-.download-description {
+.regen-text{
+  color: white; 
+  font-size: 16px; 
+  font-family: Nunito; 
+  font-weight: 700; 
+  text-transform: capitalize; 
+  line-height: 24px; 
+  letter-spacing: 0.16px; 
+  word-wrap: break-word;
+}
+
+.regen-desc{
+  width: 142px; 
+  height: 18px; 
+  color: white; 
+  font-size: 12px; 
+  font-family: Quicksand; 
+  font-weight: 700; 
+  line-height: 22px; 
+  letter-spacing: 0.12px; 
+  word-wrap: break-word;
+}
+.download-desc{
   width: 142px;
   color: #8E8E8E;
   font-size: 12px;
