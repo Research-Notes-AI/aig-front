@@ -1,5 +1,5 @@
 <template>
-<div class="Frame3658" style="width:100%; height: 100vh; background: #FCFCFC; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+<div class="text-image" >
   <div class="setting">
     <div class="setup">
       <div class="prompt">
@@ -113,14 +113,14 @@
         </div>
       </div>
       <div class="progressbar">
-        <div class="Frame3662">
+        <div class="progressbar-title">
           <div class="title">图片与提示词的相关性</div>
         </div>
            <ProgressBar 
            id="keywordsRelevance" 
            class="ProgressBar" 
            :selectedPercentage="keywordsRelevance"
-           @update:selectedPercentage="updateSelectedPercentage"
+           @selectedPercentage="updateKeywordsRelevance"
            />
         <div class="Frame3660">
           <div class="creative-label">更有创意</div>
@@ -156,13 +156,13 @@
     </div>
     <div class="generateImage" 
          @click="generateImages"
-         :disabled="isGenerating" >
+         :class="{'disabled':isGenerating}">
       <div class="generate-button">生成图片</div>
     </div>
   </div>
   <div class="image-list-area"  
-       :class="{ 'expanded': previewVisible }">
-      <div  v-if="!generatedImages.length" class="dotted-frame">
+       :class="{ 'expanded': !previewVisible }">
+    <div  v-if="!generatedImages.length" class="dotted-frame">
     <div class="SdtoolsSmell">
       <img src="../assets/smell.png">
      </div>
@@ -179,12 +179,12 @@
     </div>
     <div class="download-frame">
     <div class="download-frame-inner">
-      <div class="download" @click="downloadAllImages('image.zip')">
+      <div class="download-ttoi" @click="downloadAllImages('image.zip')">
         <div class="button-content" >
           <img src="../assets/download.png" class="icon">
-          <div class="text">
+          <div class="download-text">
              全部下载
-             <div class="description">打包下载生成的所有图片</div>
+             <div class="download-desc">打包下载生成的所有图片</div>
           </div>   
         </div>
       </div>
@@ -192,7 +192,7 @@
     </div>
     </div>
     </div>
-       </div>
+      </div>
   </div> 
   <PreviewImage 
          v-if="previewVisible" 
@@ -212,7 +212,6 @@
 import { ref,defineProps,watch } from 'vue';
 import { useToast } from 'vue-toastification';
 import ProgressBar from './ProgressBar.vue'; 
-import { setMapStoreSuffix } from 'pinia';
 import axiosInstance from '@/services/axiosConfig';
 import PreviewImage from '@/components/PreviewImage.vue';
 
@@ -261,7 +260,7 @@ const options = ref([
 const selectedOption = ref(options.value[0].text);
 
 //图片与词的相关性
-const keywordsRelevance = ref(0.8);
+const keywordsRelevance = ref(80);
 const updateKeywordsRelevance = (value: number) => {
   keywordsRelevance.value = value;
 };
@@ -286,7 +285,7 @@ const width = ref<number>(512);
 const height = ref<number>(512);
 const steps = ref<number>(25);
 const seed = ref<number>(-1);
-const name = ref(generateRandomString(5));
+// const name = ref(generateRandomString(5));
 
 //设置输入校验
 const isWidthInvalid = ref(false);
@@ -344,12 +343,12 @@ const createTask = async () => {
         prompt: keywordsInput.value,
         neg_prompt: imKeywordsInput.value,
         n: selectedOption.value, //图片生成数量
-        sim: keywordsRelevance.value, //词语相关性
+        sim: keywordsRelevance.value/100, //词语相关性
         height: height.value,
         width: width.value,
         steps: steps.value,
         seed: seed.value,
-        name: name.value,
+        // name: name.value,
         
       }
        const response = await axiosInstance.post(`/task/`, params);
@@ -418,7 +417,6 @@ const generateImages = async () => {
         imageList.value = generatedImages.value.map(image => image.id).join(',');
         isGenerating.value = false; // 恢复生成图片按钮可点击状态
         
-
       } 
   };
     /**任务创建失败就返回 */
@@ -485,9 +483,18 @@ const showPreview = (imageId: null,taskId:Number) => {
 </script>
 
 <style>
+.text-image {
+  width:100%; 
+  height: 100%; 
+  background: #FCFCFC; 
+  justify-content: flex-start; 
+  align-items: flex-start; 
+  display: inline-flex;
+  overflow: auto;
+}
 .setting {
   width: 460px;
-  height: flex;
+  height: auto;
   padding: 20px;
   background: white;
   border-right: 1px #E3E3E3 solid;
@@ -530,7 +537,7 @@ textarea {
   align-items: flex-start;
   gap: 10px;
 }
-.Frame3659, .Frame1000003490,.imageNum, .imageWH, .progressbar {
+.Frame3659, .Frame1000003490,.imageNum, .imageWH {
 
   display: flex;
   width: 420px;
@@ -538,13 +545,20 @@ textarea {
   align-items: center;
  
 } 
+.progressbar{
+  display: flex;
+  width: 420px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 10px;
+}
 
-.Frame3662 {
+.progressbar-title {
   width: 420px;
   justify-content: flex-start;
   align-items: center;
-  gap: 10px;
-  display: inline-flex;
+  display: flex;
 }
 
 .Frame3660{
@@ -725,20 +739,22 @@ textarea {
 }
 
  .image-list-area {
-  width: calc(100% - 460px);
-  height: 1017px;
+  width: calc(100% - 920px); /*减去 .setting 和.preview 的宽度 */
+   height: 100%;
   padding: 20px;
   background: #FCFCFC;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 20px;
-  display: inline-flex;
+}
+
+.image-list-area.expanded {
+  width:calc(100% - 460px); /*减去 .setting 的宽度 */
+  transition: width 0.3s ease; 
+  height: 100%;
 }
 
 .dotted-frame {
   width: 100%;
-  height: 975px;
+  height: 100%;
   padding: 20px;
   mix-blend-mode: multiply;
   background: white;
@@ -769,12 +785,12 @@ textarea {
   word-wrap: break-word;
 }
 .download-frame {
-  width: 768px; 
+  width: 100%; 
   height: 80px; 
   padding: 20px 28px;  
   border: 1px #377DFF solid; 
   border-radius: 8px;
-  justify-content: space-between; 
+  justify-content: center; 
   align-items: center; 
   display: flex;
 }
@@ -786,5 +802,17 @@ textarea {
   gap: 2px;  
   background: #FCFCFC;
 
+}
+.download-ttoi{
+  height: 60px; 
+  padding-left: 20px; 
+  padding-right: 20px; 
+  padding-top: 28px; 
+  padding-bottom: 28px; 
+  border-radius: 8px;
+  justify-content: center; 
+  align-items: center; 
+  display: flex;
+  cursor: pointer;
 }
  </style>

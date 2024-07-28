@@ -183,11 +183,10 @@ const deleteImage = async (imageId:Number) => {
   align-items: center;
   gap: 20px;
   width: 460px;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding: 20px;
   background: #fcfcfc;
+  box-sizing: border-box;
+  height: fit-content;
 }
 
 .head {

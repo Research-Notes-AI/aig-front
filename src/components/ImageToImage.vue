@@ -130,7 +130,7 @@
            id="keywordsRelevance" 
            class="ProgressBar" 
            :selectedPercentage="keywordsRelevance"
-           @update:selectedPercentage="updateSelectedPercentage"
+           @update:selectedPercentage="updateimageRelevance"
            />
         <div class="Frame3660">
           <div class="creative-label">更有创意</div>
@@ -146,7 +146,7 @@
            id="imageRelevance" 
            class="ProgressBar" 
            :selectedPercentage="keywordsRelevance"
-           @update:selectedPercentage="updateSelectedPercentage"
+           @update:selectedPercentage="updateKeywordsRelevance"
            />
         <div class="Frame3660">
           <div class="creative-label">更有创意</div>
@@ -182,12 +182,12 @@
     </div>
     <div class="generateImage" 
          @click="generateImages"
-         :disabled="isGenerating" >
+         :class="{'disabled':isGenerating}">
       <div class="generate-button">生成图片</div>
     </div>
   </div>
   <div class="image-list-area"  
-       :class="{ 'expanded': previewVisible }">
+       :class="{ 'expanded': !previewVisible }">
    <div  v-if="!generatedImages.length" class="dotted-frame">
     <div class="SdtoolsSmell">
       <img src="../assets/smell.png">
@@ -205,12 +205,12 @@
     </div>
     <div class="download-frame">
     <div class="download-frame-inner">
-      <div class="download" @click="downloadAllImages('image.zip')">
+      <div class="download-ttoi" @click="downloadAllImages('image.zip')">
         <div class="button-content" >
           <img src="../assets/download.png" class="icon">
-          <div class="text">
+          <div class="download-text">
              全部下载
-             <div class="description">打包下载生成的所有图片</div>
+             <div class="download-desc">打包下载生成的所有图片</div>
           </div>   
         </div>
       </div>
@@ -285,19 +285,19 @@ interface CreateTaskResponse {
   taskId: string;
 }
 
-//默认选择
+//默认选择，目前只能生成1张图片
 const options = ref([
   { value: 'option1', text: 1 },
-  { value: 'option2', text: 5 },
-  { value: 'option3', text: 10 },
-  { value: 'option3', text: 15 },
-  { value: 'option3', text: 20 }
+  // { value: 'option2', text: 5 },
+  // { value: 'option3', text: 10 },
+  // { value: 'option3', text: 15 },
+  // { value: 'option3', text: 20 }
 ]);
 const selectedOption = ref(options.value[0].text);
 
 //图片与词的相关性
-const keywordsRelevance = ref(0.8);
-const imageRelevance = ref(0.8);
+const keywordsRelevance = ref(80);
+const imageRelevance = ref(80);
 const updateKeywordsRelevance = (value: number) => {
   keywordsRelevance.value = value;
 };
@@ -337,7 +337,7 @@ const width = ref<number>(512);
 const height = ref<number>(512);
 const steps = ref<number>(25);
 const seed = ref<number>(-1);
-const name = ref(generateRandomString(5));
+// const name = ref(generateRandomString(5));
 
 //设置输入校验
 const isWidthInvalid = ref(false);
@@ -369,15 +369,15 @@ watch(steps, () => validateInput('steps'));
 watch(seed, () => validateInput('seed'));
 
 //生成随机字符串
-function generateRandomString(length: number): string {  
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';  
-  let result = '';  
-  const charactersLength = characters.length;  
-  for (let i = 0; i < length; i++) {  
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));  
-  }  
-  return result;  
-}  
+// function generateRandomString(length: number): string {  
+//   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';  
+//   let result = '';  
+//   const charactersLength = characters.length;  
+//   for (let i = 0; i < length; i++) {  
+//     result += characters.charAt(Math.floor(Math.random() * charactersLength));  
+//   }  
+//   return result;  
+// }  
 
 // 创建任务并获取任务ID
 const createTask = async () => {
@@ -400,13 +400,13 @@ const createTask = async () => {
         prompt: keywordsInput.value,
         neg_prompt: imKeywordsInput.value,
         n: selectedOption.value, //图片生成数量
-        sim: keywordsRelevance.value, //词语相关性
+        sim: keywordsRelevance.value/100, //词语相关性
         height: height.value,
         width: width.value,
         steps: steps.value,
         seed: seed.value,
-        name: name.value,
-        ref_image_sim: imageRelevance.value,
+        // name: name.value,
+        ref_image_sim: imageRelevance.value/100,
         ref_image_id: uploadedImageId.value, // 上传成功后imageId
 
         
@@ -543,7 +543,7 @@ const showPreview = (imageId: null,taskId:Number) => {
 <style>
 .setting {
   width: 460px;
-  height: 1017px;
+  height: 100%;
   padding: 20px;
   background: white;
   border-right: 1px #E3E3E3 solid;
@@ -712,6 +712,13 @@ textarea {
   justify-content: center;
   align-items: center;
 }
+.generateImage.disabled {
+  opacity: 0.5; /* 降低透明度以显示禁用状态 */
+  pointer-events: none; /* 禁用点击事件 */
+  background-color:gray;
+  cursor: not-allowed;
+}
+
 .generate-button {
   color: white;
   font-size: 16px;
@@ -798,25 +805,25 @@ textarea {
   flex-direction: column; 
   justify-content: space-between; 
   align-items: center;
-   display: inline-flex;
+  display: inline-flex;
  }
 
 
  .image-list-area {
-  width: 808px;
-  height: 1017px;
+  width: calc(100% - 920px); /*减去 .setting 和.preview 的宽度 */
+  height: 100%;
   padding: 20px;
   background: #FCFCFC;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 20px;
-  display: inline-flex;
+}
+.image-list-area.expanded {
+  width:calc(100% - 460px); /*减去 .setting 的宽度 */
+  transition: width 0.3s ease; 
 }
 
 .dotted-frame {
-  width: 768px;
-  height: 975px;
+  width: 100%;
+  height: 100%;
   padding: 20px;
   mix-blend-mode: multiply;
   background: white;
@@ -847,12 +854,12 @@ textarea {
   word-wrap: break-word;
 }
 .download-frame {
-  width: 768px; 
+  width: 100%; 
   height: 80px; 
   padding: 20px 28px;  
   border: 1px #377DFF solid; 
   border-radius: 8px;
-  justify-content: space-between; 
+  justify-content: center; 
   align-items: center; 
   display: flex;
 }
@@ -863,7 +870,19 @@ textarea {
   align-items: flex-start;
   gap: 2px;  
   background: #FCFCFC;
+}
 
+.download-ttoi{
+  height: 60px; 
+  padding-left: 20px; 
+  padding-right: 20px; 
+  padding-top: 28px; 
+  padding-bottom: 28px; 
+  border-radius: 8px;
+  justify-content: center; 
+  align-items: center; 
+  display: flex;
+  cursor: pointer;
 }
 
 .imageP {

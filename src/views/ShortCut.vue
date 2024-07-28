@@ -159,22 +159,22 @@
           </div>
         </div>
       </div>
-      <!-- <div class="simKeyword">
+      <div class="simKeyword">
         <div class="Frame3662">
           <div class="text-label">图片与提示词的相关性</div>
         </div>
         <ProgressBar 
            :class="{ 'expanded': previewVisible }" 
-          id="keywordsRelevance" 
+           id="keywordsRelevance" 
            class="ProgressBar" 
            :selectedPercentage="keywordsRelevance"
-           @update:selectedPercentage="updateKeywordsRelevance"
+           @selectedPercentage="updateKeywordsRelevance"
            />
         <div class="Frame3660">
           <div class="creative-label">更有创意</div>
           <div class="relevance-label">更贴近提示词</div>
         </div>
-      </div> -->
+      </div>
       <div class="ImageP">
         <div class="Frame3647">
           <div class="text-label">上传参考图片</div>
@@ -226,14 +226,16 @@
       <div class="download" @click="downloadAllImages('image.zip')">
         <div class="button-content" >
           <img src="../assets/download.png" class="icon">
-          <div class="text">
+          <div class="download-text">
              全部下载
              <div class="download-desc">打包下载生成的所有图片</div>
           </div>   
         </div>
       </div>
-      <div class="regen" @click="regenerateImages" :disabled="isGenerating">
-        <div class="button-content" >
+      <div class="regen" 
+      @click="regenerateImages" 
+      :disabled="isGenerating">
+        <div class="button-content-regen" >
           <img src="../assets/edit.png" class="icon">
             <div class="regen-text" >
              重新生成
@@ -372,8 +374,8 @@ const referenceImage = ref<string | null>(null);
 const keywordsInput = ref<string>('');
 // const sim = ref<number>(0);
 const uploadedImageId = ref<Number | null>(null);
-const keywordsRelevance = ref(0.8);
-const imageRelevance = ref(0.8);
+const keywordsRelevance = ref(80);
+const imageRelevance = ref(80);
 const updateKeywordsRelevance = (value: number) => {
   keywordsRelevance.value = value;
 };
@@ -432,7 +434,7 @@ const fetchData = async () => {
 
     if (sections.value.length > 0 && sections.value[0].items.length > 0) {
       selectedItem.value = sections.value[0].items[0];
-      senceSubTitle.value =  selectedItem.value.subTitle;
+      // senceSubTitle.value =  selectedItem.value.subTitle;
       }
     // successMessage.value = '获取项目成功'
   }
@@ -493,9 +495,9 @@ const createTask = async () => {
         shortcut_id: selectedItem.value.id, // 替换为场景Id
         prompt: keywordsInput.value,
         n: selectedOption.value, //图片生成数量
-        ref_image_sim: imageRelevance.value,
+        ref_image_sim: imageRelevance.value/100,
         ref_image_id: uploadedImageId.value, // 上传成功后imageId
-        sim:keywordsRelevance.value
+        sim:keywordsRelevance.value/100
       }
        const response = await axiosInstance.post(`/task/from_shortcut`, params);
        taskId.value = response.data.data.id; 
@@ -677,7 +679,7 @@ select {
   justify-content: flex-start;
   align-items: flex-start;
   transition: width 0.3s;
-  border-right: 1px #E3E3E3 solid;
+  /* border-right: 1px #E3E3E3 solid; */
   width: 400px; 
   height: 100vh;
 }
@@ -688,6 +690,7 @@ select {
   justify-content: flex-start; 
   align-items: flex-start; 
   display: flex;
+  border-left: 1px #E3E3E3 solid;
   box-sizing: border-box; /* 包含内边距和边框 */
 }
 
@@ -1100,12 +1103,6 @@ select {
   flex-shrink: 0;
 }
 
-/**左侧边栏样式 */
-/* .sideLeft {
-  transition: width 0.3s;
-  border-right: 1px #E3E3E3 solid;
-  width: 400px;
-} */
 
 .sideLeft.collapsed {
   width: 80px; /* 只显示图标时的宽度 */
@@ -1273,7 +1270,7 @@ textarea {
   text-align: right;
   flex-grow: 1;
 }
-.simKeyword .simImage {
+.simKeyword, .simImage {
   /* padding: 20px; */
   align-self: stretch;
   height: 114px;
@@ -1488,6 +1485,7 @@ textarea {
 }
 
 .imageList {
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;  /* 设置间隔为20px */
@@ -1545,24 +1543,26 @@ textarea {
   cursor: pointer;
 }
 
-.button-content {
+.button-content, .button-content-regen{
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
 }
 
-.button-content.disabled {
+.button-content-regen.disabled {
   opacity: 0.5; /* 示例：降低透明度以显示禁用外观 */
   pointer-events: none; /* 禁用指针事件 */
 }
+
+
 
 .icon {
   width: 24px;
   height: 24px;
 }
 
-.text {
+.download-text {
   display: flex;
   flex-direction: column;
 }
