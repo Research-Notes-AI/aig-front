@@ -485,7 +485,7 @@ const showPreview = (imageId: null,taskId:Number) => {
 <style>
 .text-image {
   width:100%; 
-  height: 100%; 
+  height: 100vh; 
   background: #FCFCFC; 
   justify-content: flex-start; 
   align-items: flex-start; 
@@ -740,7 +740,7 @@ textarea {
 
  .image-list-area {
   width: calc(100% - 920px); /*减去 .setting 和.preview 的宽度 */
-   height: 100%;
+  height: 100%;
   padding: 20px;
   background: #FCFCFC;
   flex-direction: column;

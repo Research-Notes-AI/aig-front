@@ -232,9 +232,7 @@
           </div>   
         </div>
       </div>
-      <div class="regen" 
-      @click="regenerateImages" 
-      :disabled="isGenerating">
+      <div class="regen" @click="regenerateImages" :disabled="isGenerating">
         <div class="button-content-regen" >
           <img src="../assets/edit.png" class="icon">
             <div class="regen-text" >
@@ -1176,6 +1174,7 @@ textarea {
   justify-content: flex-start;
   align-items: flex-start;
   gap: 20px;
+  height:100%;
 }
 
 .sideright2.expanded {
@@ -1447,7 +1446,7 @@ textarea {
   border-radius: 4px;
 }
 .Frame3 {
-  width: 100%;
+  width: 700px;
   height: 60px;
   padding: 12px 50px;
   background: #377dff;
@@ -1460,9 +1459,17 @@ textarea {
   margin-top: auto; /*将 Frame3 推到父容器的底部*/
   cursor: pointer;
   transition: background-color 0.3s;
-  position: relative;
+  position: absolute;
+  bottom: 20px;
 
 }
+.Frame3.disabled {
+  opacity: 0.5; /* 降低透明度以显示禁用状态 */
+  pointer-events: none; /* 禁用点击事件 */
+  background-color:gray;
+  cursor: not-allowed;
+}
+
 .generate-button {
   position: fiexd;
   bottom: 0px;
@@ -1474,15 +1481,8 @@ textarea {
   line-height: 24px;
   letter-spacing: 0.16px;
   word-wrap: break-word;
- 
+}
 
-}
-.Frame3.disabled {
-  opacity: 0.5; /* 降低透明度以显示禁用状态 */
-  pointer-events: none; /* 禁用点击事件 */
-  background-color:gray;
-  cursor: not-allowed;
-}
 
 .imageList {
   width: 100%;

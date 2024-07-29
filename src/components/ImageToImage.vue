@@ -1,5 +1,5 @@
 <template>
-<div class="Frame3658" style="width:100%; height: 100vh; background: #FCFCFC; justify-content: flex-start; align-items: flex-start; display: inline-flex">
+<div class="image-image" >
   <div class="setting">
     <div class="setup">
       <div :class="['imageP', { 'input-error': !isImageUploaded }]" >
@@ -541,6 +541,14 @@ const showPreview = (imageId: null,taskId:Number) => {
 </script>
 
 <style>
+.image-image {
+  width:100%; 
+  height: 100vh; 
+  background: #FCFCFC; 
+  justify-content: flex-start; 
+  align-items: flex-start; 
+  display: inline-flex;
+}
 .setting {
   width: 460px;
   height: 100%;
