@@ -1,167 +1,138 @@
 <template>
-<div class="shortcut-container">
-      <div class="middle" >
-        
-      <div v-for="(section,sectionIndex) in sections" :key="sectionIndex" class="sence">
-          <div class="middle-title">{{ section.title }}</div>
-          <div 
-              v-for="(middleItem, itemIndex) in section.items" 
-              :key="itemIndex"
-              :class="['middleItem', { active: selectedItem && selectedItem.subTitle === middleItem.subTitle }]"
-              @click="selectItem(middleItem)" 
-           >
-             <img :src="`http://13.215.140.116:5001/api/v1/image/${middleItem.imageSmall}`" class="middle-image" />
-             <div class="middle-subtitle">{{ middleItem.subTitle }}</div>
+<div class="container">
+  <div :class="['sideLeft', { collapsed: isCollapsed } ]">
+    <div class="lefttop" >
+      <div class="ComponentLogo" v-if="!isCollapsed">
+        <img class="Abstract05" src="../assets/abstract-05.png" />
+        <div class="Frame2186">
+          <div class="AigAiImagesGenerator">
+            <span>AIG <br /></span><span>AI Images Generator</span>
           </div>
-       </div>
-      </div>
-      <div class="sideright2" :class="{ 'expanded': !previewVisible }">
-      <!-- <div class="Frame3666"> -->
-      <div class="prompt">
-        <div class="prompt-frame">
-          <div class="text-label">提示词</div>
-          <div class="text-count">{{ keywordsInput.length }}/1000</div>
         </div>
-        <textarea
-          v-model="keywordsInput"
-          @input="updateText"
-          placeholder="输入提示词"
-          :class="{ 'input-error': isKeywordInputEmpty }"
-        ></textarea>
       </div>
-      <div class="text_image_num">
-        <div class="text-label">生成图片数量</div>
-        <div class="Frame1000003489">
-          <div class="Frame1000003487">
-            <div class="CommonImagessmall">
-              <img src="../assets/imagessmall.png" />
+      <div :class="['CommonSidebarLeft', { 'collapsed': isCollapsed }]" >
+          <img :src="isCollapsed ? '../src/assets/sidebar-right.png' : '../src/assets/sidebar-left.png'"
+                @click="toggleSidebar" 
+                />
+      </div>
+    </div>
+    <div class="Frame_blank">
+      <div class="leftMid" >
+        <SidebarItem
+          title="快捷场景"
+          description="常用场景快捷生图"
+          :iconSrc="currentTitle === '快捷场景' ? '../assets/gallery-edit.png' : '../assets/gallery-favorite.png'"
+          :arrowSrc="currentTitle === '快捷场景' ? '../assets/arrow-right01.png' : '../assets/right01.png'"
+          :isActive="currentTitle === '快捷场景'"
+          :isCollapsed = "isCollapsed"
+          acitiveTitle="快捷场景" 
+          @item-click="() => navigateTo('ShortCut')"
+        />
+        <SidebarItem
+          title="中文生图"
+          description="用中文提示词与简单参数生成图片"
+          :iconSrc="currentTitle === '中文生图' ? '../assets/translate-gray.png' : '../assets/translate.png'"
+          :arrowSrc="currentTitle === '中文生图' ? '../assets/arrow-right01.png' : '../assets/right01.png'"
+          :isActive="currentTitle === '中文生图'"
+          :isCollapsed = "isCollapsed"
+          @item-click="() => navigateTo('TextToImage')"
+          acitiveTitle="文生图 图生图" 
+        />
+        <div :class="['documentCode', { 'no-border': isCollapsed }]" >
+          <div class="Frame3649">
+            <div class="CommonDocumentCode">
+              <img src="../assets/document-code.png">
             </div>
-            <div class="select">
-              <select id="dropdown" v-model="selectedOption">
-                <option v-for="option in options" :key="option.value" :value="option.text">
-                  {{ option.text }}
-                </option>
-              </select>
+            <div class="code2image" v-if="!isCollapsed" >
+              <div class="title">高级生图</div>
+              <div class="tips">用英文Prompt与完整参数生成图片</div>
             </div>
           </div>
-        </div>
+          <div v-if="!isCollapsed" >建设中</div>
+        </div>    
+              
       </div>
-      <div class="simKeyword">
-        <div class="Frame3662">
-          <div class="text-label">图片与提示词的相关性</div>
-        </div>
-        <ProgressBar 
-           :class="{ 'expanded': previewVisible }" 
-           id="keywordsRelevance" 
-           class="ProgressBar" 
-           :selectedPercentage="keywordsRelevance"
-           @selectedPercentage="updateKeywordsRelevance"
-           />
-        <div class="Frame3660">
-          <div class="creative-label">更有创意</div>
-          <div class="relevance-label">更贴近提示词</div>
-        </div>
-      </div>
-      <div class="ImageP">
-        <div class="Frame3647">
-          <div class="text-label">上传参考图片</div>
-          <div class="reference-description">上传后会生成与参考图片相似的图片</div>
-        </div>
-        <div class="SdtoolsImageP">
-          <ImageUploader
-           :imageUrl="imageUrl"
-           @uploadSuccess="handleUploadSuccess"/>
-        </div>
-      </div>
-      <div  v-if="isImageUploaded" class="simImage"  >
-           <div class="Frame3662">
-           <div class="text-label">贴近参考图程度</div>
-        </div>
-        <ProgressBar 
-        :class="{ 'expanded': previewVisible }" 
-        id="imageRelevance" 
-        :selectedPercentage="imageRelevance"
-        @update:selectedPercentage="updateImageRelevance" 
-        class="ProgressBar"/>
-        <div class="Frame3660">
-          <div class="creative-label">更有创意</div>
-          <div class="relevance-label">更贴近参考图</div>
-        </div>
-      </div>
-      <div v-if="!(generatedImages.length)" class="senceInfo">
-        <div class="text-label">场景说明</div>
-        <div v-if="selectedItem" class="scene-description">{{ selectedItem.desc }}</div>
-        <img v-if="selectedItem" class="Image8" :src="`http://13.215.140.116:5001/api/v1/image/${selectedItem.imageBig}`" />
-       </div>
-      <div v-else class="imageList">
-         <div v-if="isGenerating">正在生成图片，请稍候...</div>
-         <div v-for="image in generatedImages" 
-         :key="image.id" 
-         class="image-container" 
-         @click="showPreview(image.id,taskId)"
-         >
-            <img class="imageItem" :src="'http://13.215.140.116:5001/api/v1/image/' + image.id" :alt="image.title" />
-         </div>
-      </div>
-    <div v-if="!(generatedImages.length)" class="Frame3"     
-            @click="generateImages" 
-            :class="{'disabled':isGenerating}">
-        <div class="generate-button" 
-             >生成图片</div>
-    </div>
-    <div v-else class="action-buttons">
-      <div class="download" @click="downloadAllImages('image.zip')">
-        <div class="button-content" >
-          <img src="../assets/download.png" class="icon">
-          <div class="download-text">
-             全部下载
-             <div class="download-desc">打包下载生成的所有图片</div>
-          </div>   
-        </div>
-      </div>
-      <div class="regen" @click="regenerateImages" :disabled="isGenerating">
-        <div class="button-content-regen" >
-          <img src="../assets/edit.png" class="icon">
-            <div class="regen-text" >
-             重新生成
-            <div class="regen-desc" >修改条件重新生成图片</div>
+      <div class="leftBottom" >
+        <div class="Frame1000003507">
+          <div class="ComponentAbstract01">
+            <div class="ComponentAbstract06">
+              <img class="Abstract06" src="../assets/profile-circle.png" />
+            </div>
           </div>
+          <div class="Larrykey" v-if="!isCollapsed" >LarryKey</div>
+        </div>
+        <div class="Frame1000003506">
+          <div class="CommonDocumentText">
+            <div class="CommonDocumentText">
+              <div class="DocumentText">
+                <img src="../assets/document-text.png">
+              </div>
+            </div>
+          </div>
+          <div v-if="!isCollapsed" >教程</div>
+        </div>
+        <div class="Frame1000003509">
+          <div class="CommonMessageText">
+            <div class="CommonMessageText">
+              <div class="MessageText">
+                <img src="../assets/message-text.png">
+              </div>
+            </div>
+          </div>
+          <div v-if="!isCollapsed" >论坛</div>
         </div>
       </div>
     </div>
-        <!-- </div> -->
-      </div>
-      <PreviewImage 
-         v-if="previewVisible" 
-         :imageId="selectedImageId" 
-         @close="closePreview" 
-         @imageDeleted="handleImageDeleted" 
-         @referenceSet="handleReferenceSet"
-         :taskDetail="taskDetail"
-         :shortcutId="shortcutId"
-         :imageUrl="uploadedImageUrl"
-         :currentTitle="currentTitle"
-         :senceSubTitle="senceSubTitle"
-         class="preview-image"
-         :show-reference-option="true"
-         :images="imageList"
-       />
+  </div>
+  <div :class="['sideRight', { expanded: isCollapsed } ]" >
+    <div class="right-top">
+    <div class="right-top-inner">
+      
+      <div v-if="currentTitle==='中文生图'" class="tabs-container" >
+        <div 
+         class="tab" 
+         :class="{ active: activeTab === '文生图' }" 
+         @click="() => selectTab('文生图')"
+          >
+         文生图
+        </div>
+        <div 
+        class="tab" 
+        :class="{ active: activeTab === '图生图' }" 
+        @click="() => selectTab('图生图')"
+        >
+         图生图
+        </div>
+       </div>
+       <div v-else class="title" >{{ currentTitle }}</div>
     </div>
+      
+    <div class="ComponentHistory">
+      <div class="Frame1000003526">
+        <div class="SdtoolsHistory">
+          <img src="../assets/history.png" />
+        </div>
+        <div class="history-text">历史任务</div>
+      </div>
+    </div>
+     </div>
+     <router-view />
+</div>
+  
+</div>
 </template>
 
 <script setup lang="ts">
-import { ref,onMounted, watch } from 'vue'
+import { ref,onMounted , defineEmits,computed } from 'vue'
 import { useToast } from 'vue-toastification';
 
-import ProgressBar from '../components/ProgressBar.vue';
-import ImageUploader from '../components/ImageUploader.vue';
+import SidebarItem from '../components/SideBarItem.vue';
+import  {useRouter, useRoute , RouterView}  from 'vue-router'
 import axiosInstance from '@/services/axiosConfig';
 
-import PreviewImage from '@/components/PreviewImage.vue';
-import  {useRouter, useRoute }  from 'vue-router'
-const router = useRouter();
-const route = useRoute();
- 
+
+const router = useRouter()
+const route = useRoute()
 
 const previewVisible = ref(false);
 const selectedImageId = ref(null);
@@ -169,9 +140,24 @@ const selectedImageId = ref(null);
 const isImageUploaded = ref(false);
 const activeTab = ref('文生图');
 
+const emit = defineEmits(['click'])
+// 动态计算 未完成的class
+const documentCode = computed(() => {
+  return {
+    'documentCode': true,
+    'no-border': isCollapsed.value
+  };
+});
+
+
 const selectTab = (tab: string) => {
   activeTab.value = tab;
   senceSubTitle = activeTab.value;
+  if (tab === '图生图') {
+    router.push('/main/ImageToImage')
+  } else {
+    router.push('/main/TextToImage')
+  }
   }
 
 // const imageId = ref();
@@ -180,8 +166,7 @@ const selectTab = (tab: string) => {
 const showPreview = (imageId: null,taskId:Number) => {
   selectedImageId.value = imageId;
   previewVisible.value = true;
-  uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageId}`; 
-
+  // store.dispatch('fetchTaskDetails', taskId);
 
 };
 //定义变量
@@ -191,7 +176,7 @@ const toast = useToast();
 const isGenerating = ref(false); // 控制生成图片按钮是否可点击的状态
 const isKeywordInputEmpty = ref(false);//提示词输入状态
 
-const currentTitle = ref<string>('快捷场景');// 默认选中第一个项的标题
+const currentTitle = ref('快捷场景');// 默认选中第一个项的标题
 const activeTitle = ref<string>('快捷场景');
 // const isSidebarCollapsed = ref(false);
 
@@ -201,6 +186,12 @@ const updateTitle = (title: string) => {
 
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value;
+  emit('click', isCollapsed.value);
+};
+
+const navigateTo = (route: string) => {
+  currentTitle.value = route === 'ShortCut' ? '快捷场景' : '中文生图';
+  router.push(`/main/${route}`)
 };
 
 const options = ref([
@@ -215,27 +206,27 @@ const options = ref([
 const imageUrl = ref<string | null>(null); // 用于传递给 ImageUploader.vue 的图标
 const uploadedImageUrl = ref<string | null>(null);
 const referenceImage = ref<string | null>(null);
-const imageIdList = ref<string[]>([]);
 
-// 快捷场景生成任务入参
-const keywordsInput = ref<string>('');
-// const sim = ref<number>(0);
+
+// // 快捷场景生成任务入参
+// const keywordsInput = ref<string>('');
+// // const sim = ref<number>(0);
 const uploadedImageId = ref<Number | null>(null);
-const keywordsRelevance = ref(80);
-const imageRelevance = ref(80);
-const updateKeywordsRelevance = (value: number) => {
-  keywordsRelevance.value = value;
-};
-const updateImageRelevance = (value: number) => {
-  imageRelevance.value = value;
-};
+// const keywordsRelevance = ref(80);
+// const imageRelevance = ref(80);
+// const updateKeywordsRelevance = (value: number) => {
+//   keywordsRelevance.value = value;
+// };
+// const updateImageRelevance = (value: number) => {
+//   imageRelevance.value = value;
+// };
 
 
 //上传成功事件动作
 const handleUploadSuccess = (imageId: Number) => {
   isImageUploaded.value = true;
   uploadedImageId.value = imageId;
-  uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageId}`; 
+  uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageId}`; //更新图标
   imageUrl.value = uploadedImageUrl.value; // 更新图标
   console.log(imageUrl.value);
 
@@ -310,23 +301,6 @@ const selectItem = (item: any) => {
  selectedItem.value = item;
    if(selectedItem.value){
    senceSubTitle = selectedItem.value.subTitle;
-   
-  // 重置输入状态
-  keywordsInput.value = '';
-  keywordsRelevance.value = 80;
-  generatedImages.value = [];
-  isImageUploaded.value = false;
-  imageUrl.value = '';
-
-
-  // // 强制刷新当前 ShortCut 页面
-  // router.push({ name: 'ShortCut', query: {} }).then(() => {
-  //   router.go(0); // 这行代码会重新加载当前路由
-  // });
-  if (route.name === 'ShortCut' && route.query.taskid) {
-    // 当前是 shortcut?taskid=*** 页面，更新地址栏为 shortcut
-    router.push({ name: 'ShortCut', query: {} });
-  } 
  }
  else
   {toast.error("未选中场景！！！")}
@@ -339,136 +313,6 @@ const updateText = (event: Event) => {
   const target = event.target as HTMLTextAreaElement;
   text.value = target.value;
 };
-
-
-// 创建任务并获取任务ID
-const createTask = async () => {
-  try {
-  
-    if (!keywordsInput.value.trim()) {
-    isKeywordInputEmpty.value = true;
-    toast.info("请输入提示词");
-    return false;
-     }
-     isKeywordInputEmpty.value = false;
-    if (selectedItem.value ) {
-       shortcutId = selectedItem.value.id;
-       if(uploadedImageId.value){
-       const params = {
-        shortcut_id: selectedItem.value.id, // 替换为场景Id
-        prompt: keywordsInput.value,
-        n: selectedOption.value, //图片生成数量
-        ref_image_sim: imageRelevance.value/100,
-        ref_image_id: uploadedImageId.value, // 上传成功后imageId
-        sim:keywordsRelevance.value/100
-      }
-       const response = await axiosInstance.post(`/task/from_shortcut`, params);
-       taskId.value = response.data.data.id; 
-  
-       }
-        else{
-        const params = {
-         shortcut_id: selectedItem.value.id, // 替换为场景Id
-         prompt: keywordsInput.value,
-         n: selectedOption.value, //图片生成数量
-         sim:keywordsRelevance.value/100
-          } 
-         const response = await axiosInstance.post(`/task/from_shortcut`, params);
-          taskId.value = response.data.data.id  
-        }
-       return true;
-    } else {
-      toast.error('获取快捷场景id失败');
-      return false; // 获取快捷场景ID失败
-
-    }
-  } catch (error) {
-    toast.error('创建任务失败');
-    console.error('Error creating task:', error);
-    return false; // 创建任务失败
-
-  }
-};
-
-//查询任务状态信息
-const queryTaskStatus = async () => {
-  if (!taskId.value) {
-    const isTaskCreated = await createTask();
-    if (!isTaskCreated) {
-      return false; // 创建任务失败，终止后续操作
-    }
-  }
-  try {
-    if (taskId.value) {
-      const params = {
-        task_id: taskId.value // 替换为任务Id
-      };
-      const response = await axiosInstance.get(`/task/${params.task_id}`);
-      taskStatus.value = response.data.data.status;// 替换为实际的任务状态查询接口
-      taskDetail.value = response.data.data;
-      console.log(taskDetail.value)
-      return taskStatus.value === 'completed'; // 接口返回任务状态，判断是否完成
-      // 更新 URL，追加 taskId 参数
-  
-     } 
-      else {
-      toast.error('任务id获取失败');
-      return false; // 获取任务ID失败
-     } 
-   } catch (error) {
-
-    console.error('Error querying task status:', error);
-    return false; // 查询失败时返回 false，
-  }
-};
-
-//生成图片
-const generateImages = async () => {
-  
- if(isGenerating.value) return; // 防止重复点击
-  
-  isGenerating.value = true; // 设置生成图片按钮不可点击状态
- 
- try { 
-   
-   const checkTaskStatus = async () => {
-    const isCompleted = await queryTaskStatus();
-    // console.log(isCompleted)
-    if (!isCompleted) {
-      // 如果任务状态不是完成态，继续查询
-      setTimeout(checkTaskStatus, 1000); // 设置适当的间隔，避免过度频繁地查询
-    } else {
-      // 任务状态为完成态时，调用获取图片接口
-        const params = {
-          task_id: taskId.value, // 替换为实际任务ID
-        };
-        const response = await axiosInstance.get('/image/list', { params });
-        generatedImages.value = response.data.data; // 返回的数据中包含图片数组
-
-        imageList.value = generatedImages.value.map(image => image.id).join(','); //用于下载图片用
-        console.log(imageList.value);
-        isGenerating.value = false; // 恢复生成图片按钮可点击状态
-        console.log(taskId.value );
-        router.push({ name: 'ShortCut', query: { taskid: taskId.value } });
-        saveState();
-      } 
-  };
-  /**任务创建失败就返回 */
-   const isTaskCreated = await createTask();
-    if (!isTaskCreated) {
-      isGenerating.value = false;
-      return;
-    }
-  await checkTaskStatus(); // 首次调用检查任务状态
-}
-  catch (error) {
-    console.error('Error generating images:', error);
-  } 
-  finally {
-    isGenerating.value = false; // 恢复生成图片按钮可点击状态
-  }
-};
-
 
 /*下载所有图片*/
 const downloadAllImages = async (filename: string) => {
@@ -508,66 +352,32 @@ function closePreview() {
 }
 
 // 处理图片删除
-const handleImageDeleted = (imageId:any,imageNextId:any ) => {
-
- //图片展示部分去掉删除的图片
-  generatedImages.value = generatedImages.value.filter(image => image.id !== imageId);  
-  if (imageNextId==="" ){
-    previewVisible.value = false;
-    selectedImageId.value = null;
-  }
-  else {
-    console.log(imageNextId);
-    previewVisible.value = true;
-    selectedImageId.value = imageNextId;
-    uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageNextId}`; 
-
-  }
-}
-
-// 保存当前状态到 localStorage
-const saveState = () => {
-  localStorage.setItem('keywordsInput', keywordsInput.value);
-  localStorage.setItem('generatedImages', JSON.stringify(generatedImages.value));
-  localStorage.setItem('imageRelevance', String(imageRelevance.value));
-  localStorage.setItem('keywordsRelevance', String(keywordsRelevance.value));
-  localStorage.setItem('isImageUploaded',String(isImageUploaded.value));
-  localStorage.setItem('imageUrl',String(imageUrl.value));
-  localStorage.setItem('previewVisible',String(previewVisible.value))
+const handleImageDeleted = (imageId:any) => {
+  generatedImages.value = generatedImages.value.filter(image => image.id !== imageId);
+  selectedImageId.value = null;
+  previewVisible.value = false;
 };
 
-// 监听变化保存状态
-watch([keywordsInput, generatedImages, imageRelevance, keywordsRelevance,isImageUploaded,imageUrl,previewVisible], saveState);
-
 onMounted(() => {
+  // 初始化选中第一个标题
+  // currentTitle.value = '快捷场景';
+  // activeTitle.value = '快捷场景';
   fetchData();
-  if (route.query.taskid) {
-    // 只有当有 taskid 时才恢复状态
-    keywordsInput.value = localStorage.getItem('keywordsInput') || '';
-    generatedImages.value = JSON.parse(localStorage.getItem('generatedImages') || '[]');
-    imageRelevance.value = parseInt(localStorage.getItem('imageRelevance')?? '80') || 80;
-    keywordsRelevance.value = parseInt(localStorage.getItem('keywordsRelevance') ?? '80') || 80;
-    const storedValue = localStorage.getItem('isImageUploaded');
-    isImageUploaded.value = storedValue === 'true';
-    imageUrl.value = localStorage.getItem('imageUrl') || '';
-    previewVisible.value = false;
+  if (route.path === '/main/ImageToImage') {
+    activeTab.value = '图生图'
+    currentTitle.value = '中文生图'
   }
-  else
-  { // 初始化选中第一个标题
-    currentTitle.value = '快捷场景';
-    activeTitle.value = '快捷场景';
-    fetchData();
-  }
+
 });
 </script>
 
 <style> 
-.shortcut-container {
+.container {
   width: 100%;
   align-items:flex-start;
   height: 100vh; 
-  display: flex;
-  position: relative; /* 确保子元素的绝对定位 */ 
+  display: flex; 
+  /* overflow-x: hidden; 禁用容器的水平滚动 */
 }
 select {
   /* margin-top: 2px; */
@@ -579,6 +389,15 @@ select {
   outline: none; /* 移除默认的焦点样式 */
 }
 
+.sideLeft {
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  transition: width 0.3s;
+  /* border-right: 1px #E3E3E3 solid; */
+  width: 400px; 
+  height: 100vh;
+}
 .sideRight {
   flex-grow: 1;
   width:calc(100% - 400px);
@@ -665,7 +484,7 @@ select {
   letter-spacing: 0.14px;
 }
 
-.CommonSidebarLeft,
+
 .CommonArrowRight01,
 .CommonGalleryFavorite,
 .CommonTranslate,
@@ -681,6 +500,26 @@ select {
   padding: 0; */
 }
 
+.CommonSidebarLeft {
+  width: 24px;
+  height: 24px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  padding-left: 32px;
+}
+
+.CommonSidebarLeft.collapsed {
+  padding-left: 32px; /* 收起时的左侧间距 */
+  /* 你可以在这里设置收起时的宽度等其他样式 */
+}
+
+/* 如果边栏展开时有不同样式，可以定义 */
+.CommonSidebarLeft:not(.collapsed) {
+  padding-left: 0; /* 展开时去掉左侧间距 */
+  /* 其他展开时的样式 */
+  } 
+
 .ComponentAbstract06,
 .DocumentText,
 .MessageText {
@@ -692,6 +531,7 @@ select {
 .SidebarLeft img {
   width: 24px;
   height: 24px;
+ 
 }
 
 
@@ -726,6 +566,8 @@ select {
   justify-content: space-between;
   align-items: center;
   display: inline-flex;
+  transition: border 0.3s ease; /* 添加过渡效果 */
+
 }
 
 .Frame3643 {
@@ -853,6 +695,7 @@ select {
   display: flex;
   border-radius: 0px 16px 0px 0px;
   border-bottom: 1px solid #E3E3E3;
+  
   box-sizing: border-box; /* 包含内边距和边框 */
 }
 
@@ -1000,6 +843,11 @@ select {
 }
 
 
+.sideLeft.collapsed {
+  width: 80px; /* 只显示图标时的宽度 */
+  height: 100px;
+  transition: width 0.3s;
+}
 
 .SidebarItem {
   display: flex;
@@ -1016,6 +864,13 @@ select {
   display: none;
 }
 
+.sideLeft:not(.collapsed) .SidebarItem .description .documentCode .code2image{
+  display: block;
+}
+ 
+.no-border {
+  border: none; /* 当边栏收起时移除边框 */
+}
 
 .documentCode img {
   display: block;
@@ -1026,25 +881,6 @@ select {
   display: block;
 }
 
-/** 提示词输入*/
-textarea {
-  font-size: 16px;
-  font-family: Arial, sans-serif;
-  resize: vertical;
-  align-self: stretch;
-  height: 80px; 
-  width:100%;
-  padding-left:20px; 
-  padding-right:20px; 
-  padding-top: 10px; /* 添加此行以设置上边距 */
-  mix-blend-mode:multiply; 
-  background: white; 
-  border-radius: 8px; 
-  border: 1px #E5E5E5 solid;
-  justify-content: flex-start; 
-  align-items: center; gap: 113px; 
-  display: inline-flex;
-}
 
 /**生成图片区域 */
 
@@ -1332,43 +1168,6 @@ textarea {
   height: 260px;
   border-radius: 4px;
 }
-.Frame3 {
-  width: 100%;
-  height: 60px;
-  padding: 12px 50px;
-  background: #377dff;
-  border-radius: 8px;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  /* flex-shrink: 0; */
-  display: flex;
-  margin-top: auto; /*将 Frame3 推到父容器的底部*/
-  cursor: pointer;
-  transition: background-color 0.3s;
-  /* position: absolute;
-  bottom: 20px; */
-
-}
-.Frame3.disabled {
-  opacity: 0.5; /* 降低透明度以显示禁用状态 */
-  pointer-events: none; /* 禁用点击事件 */
-  background-color:gray;
-  cursor: not-allowed;
-}
-
-.generate-button {
-  position: fiexd;
-  bottom: 0px;
-  left: 0;
-  color: white;
-  font-size: 16px;
-  font-family: Quicksand;
-  font-weight: 700;
-  line-height: 24px;
-  letter-spacing: 0.16px;
-  word-wrap: break-word;
-}
 
 
 .imageList {
@@ -1516,8 +1315,8 @@ textarea {
   padding: 0.5rem 1rem;
   cursor: pointer;
   font-weight: normal;
-  color: #8E8E8E;
-  border-bottom: 2px solid transparent;
+  /* color: #8E8E8E; */
+  border-bottom: 1px solid transparent;
   transition: color 0.3s, border-bottom 0.3s;
   font-family: Nunito;
   font-size: 16px;
@@ -1533,6 +1332,6 @@ textarea {
 .tab.active {
   font-weight: bold;
   color: #000;
-  border-bottom: 2px solid #377DFF ;
+  border-bottom: 1px solid #377DFF ;
 }
 </style>

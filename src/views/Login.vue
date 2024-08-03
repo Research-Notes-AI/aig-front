@@ -15,10 +15,14 @@
         <input class="usernameId" v-model="form.email" type="text" placeholder="用户名或邮箱" />
       </div>
       <div class="Frame1000003533">
-        <input class="passwordId" v-model="form.password" type="password" placeholder="密码" />
-        <div class="CommonEyeSlash">
+        <input class="passwordId" 
+        v-model="form.password" 
+        :type="isPasswordVisible ? 'text' : 'password'"
+        placeholder="密码" />
+        <div class="CommonEyeSlash"
+          @click="togglePasswordVisibility">
           <div class="EyeSlash">
-           <img src="../assets/eye-slash.png">
+           <img :src="isPasswordVisible ? 'src/assets/eye.png' : 'src/assets/eye-slash.png'">
           </div>
         </div>
       </div>
@@ -59,13 +63,14 @@ const form = reactive({
 })
 const router = useRouter();
 
-// const login = () => {
-//   if (username.value === 'test' && password.value === '123456') {
-//     router.push('/shortCut');
-//   } else {
-//     alert('用户名或密码错误');
-//   }
-// };
+// 定义密码可见性状态
+const isPasswordVisible = ref(false);
+
+// 切换密码可见性
+const togglePasswordVisibility = () => {
+  isPasswordVisible.value = !isPasswordVisible.value;
+};
+
 const error = ref('')
 
 const login = async () => {
@@ -82,7 +87,7 @@ const login = async () => {
     localStorage.setItem('token', response.data.data.token)
     console.log(localStorage.getItem('token'))
     console.log('登录成功', response.data);
-    router.push('/shortCut');
+    router.push('/main');
   } catch (err) {
     if (error.response && err.response.status === 401) {
       error.value = '用户名或密码错误'

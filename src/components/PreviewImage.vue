@@ -26,7 +26,7 @@
       </div>
       <div class="op3">
         <div class="SdtoolsStar" @click="toggleFavorite(imageId)">
-          <img :src="isFavorite ? 'src/assets/star-full.png' : 'src/assets/star_black.png'" />
+          <img :src="isFavorite ? '../src/assets/star-full.png' : '../src/assets/star_black.png'" />
         </div>
         <div class="op-title">喜欢</div>
       </div>
@@ -75,9 +75,8 @@
 import { defineProps, PropType ,defineEmits} from 'vue';
 import axiosInstance from '@/services/axiosConfig';
 import { ref, watch } from 'vue';
-import { toastInjectionKey } from 'vue-toastification';
 import { useToast } from 'vue-toastification';
-import { SetupStoreDefinition } from 'pinia';
+import { exit } from 'process';
 
 const toast = useToast();
 
@@ -96,16 +95,28 @@ interface TaskDetail {
 // 定义 props
 const props = defineProps<{
   taskDetail: TaskDetail;
-  imageId: string;
-  shortcutId: string;
+  imageId: Number;
+  shortcutId: Number;
   imageUrl: string;
   showReferenceOption: boolean;  
   currentTitle: string;
   senceSubTitle: string;
+  images: String;
 }>();
 
 console.log(props.currentTitle);
 console.log(props.senceSubTitle);
+if(props.images==="")
+ {
+  toast.error("获取不到图片!")
+
+ }
+
+const imagesList = props.images.split(",");
+console.log(imagesList);
+console.log(props.imageId);
+const currentIndex = ref(imagesList.indexOf(String(props.imageId)));
+console.log(currentIndex.value);
 
 //下载图片
 const downloadImage = async (imageId: Number, filename: string) => {
@@ -165,9 +176,28 @@ const toggleFavorite = async (imageId:number) => {
 const deleteImage = async (imageId:Number) => {
   try {
     const response= await axiosInstance.post(`/image/delete/${props.imageId}`);
-    emits('imageDeleted', props.imageId);
     if(response.data.success)
-       {toast.info("删除图片成功!")}
+      {        
+        // 从数组中移除当前图片
+        imagesList.splice(currentIndex.value, 1);
+        toast.info("删除图片成功!")
+        if (imagesList.length === 0) {
+          //没有图片时关闭预览
+          emits('imageDeleted', imageId , "" );  
+        }
+        else
+        { 
+          if (currentIndex.value === 0) {
+          currentIndex.value = imagesList.length - 1;  // 切换到最后一张
+          } else {
+          currentIndex.value--;  // 切换到前一张
+          }
+           // 更新当前显示的图片ID 传给父组件
+           console.log(imagesList[currentIndex.value])
+          emits('imageDeleted', imageId, imagesList[currentIndex.value]);
+        }
+
+      }
   } catch (error) {
     console.error('删除图片时出错:', error);
   }

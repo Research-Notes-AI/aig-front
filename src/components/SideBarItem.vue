@@ -4,13 +4,13 @@
     @mouseover="isHovered = true" 
     @mouseleave="isHovered = false"
     @click="handleClick"
-    :class="{ 'hovered': isHovered, 'active': isActive }"
+    :class="{ 'hovered': isHovered, 'active': props.isActive, 'collapsed': props.isCollapsed }"
   >
     <div class="item-content">
       <div class="item-icon">
         <img :src="resolveImage(iconSrc)" />
       </div>
-      <div class="item-text">
+      <div  class="item-text">
         <div class="title">{{ title }}</div>
         <div class="description">{{ description }}</div>
       </div>
@@ -30,12 +30,14 @@ const props = defineProps<{
   iconSrc: string,
   arrowSrc: string,
   isActive: boolean,
-  acitiveTitle: string
+  acitiveTitle: string,
+  isCollapsed: boolean,
 }>();
 
 const emits = defineEmits(['item-click']);
 
 const isHovered = ref(false);
+console.log(props.isCollapsed);
 
 const handleClick = () => {
   emits('item-click', props.title);
@@ -65,6 +67,18 @@ const resolveImage = (src: string) => {
 .sidebar-item.active {
   border-color: #377DFF;
    cursor: pointer;
+   transition: border-color 0.3s;
+
+}
+
+.sidebar-item.collapsed {
+  border:none;
+  cursor: pointer;
+}
+.sidebar-item.collapsed.active {
+  border: none; /* or use border-color: transparent; */
+  transition: border-color 0.3s;
+
 }
 .item-content {
   display: flex;

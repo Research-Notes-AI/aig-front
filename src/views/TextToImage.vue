@@ -1,18 +1,7 @@
 <template>
-<div class="image-image" >
+<div class="text-image" >
   <div class="setting">
     <div class="setup">
-      <div :class="['imageP', { 'input-error': !isImageUploaded }]" >
-        <div class="image-frame">
-          <div class="text-label">参考图片</div>
-          <div class="reference-description">上传后会生成与参考图片相似的图片</div>
-        </div>
-        <div class="SdtoolsImageP">
-          <ImageUploader
-           :imageUrl="imageUrl"
-           @uploadSuccess="handleUploadSuccess"/>
-        </div>
-      </div>
       <div class="prompt">
         <div class="Frame3659">
           <div class="title">提示词</div>
@@ -33,6 +22,7 @@
               <img src="../assets/help.png">
               <div class="tooltip">描述不希望出现的元素或风格，来避免生成这些内容。</div>
             </div>
+      
           </div>
           <div class="text-count">{{ imKeywordsInput.length }}/1000</div>
         </div>
@@ -123,34 +113,18 @@
         </div>
       </div>
       <div class="progressbar">
-        <div class="Frame3662">
+        <div class="progressbar-title">
           <div class="title">图片与提示词的相关性</div>
         </div>
            <ProgressBar 
            id="keywordsRelevance" 
            class="ProgressBar" 
            :selectedPercentage="keywordsRelevance"
-           @update:selectedPercentage="updateimageRelevance"
+           @selectedPercentage="updateKeywordsRelevance"
            />
         <div class="Frame3660">
           <div class="creative-label">更有创意</div>
           <div class="relevance-label">更贴近提示词</div>
-        </div>
-      </div>
-      <div class="progressbar">
-        <div class="Frame3662">
-          <div class="title">贴近参考图程度</div>
-        </div>
-           <ProgressBar 
-           :class="{ 'expanded': previewVisible }" 
-           id="imageRelevance" 
-           class="ProgressBar" 
-           :selectedPercentage="keywordsRelevance"
-           @update:selectedPercentage="updateKeywordsRelevance"
-           />
-        <div class="Frame3660">
-          <div class="creative-label">更有创意</div>
-          <div class="relevance-label">更贴近参考图</div>
         </div>
       </div>
       <div class="seeds">
@@ -188,13 +162,13 @@
   </div>
   <div class="image-list-area"  
        :class="{ 'expanded': !previewVisible }">
-   <div  v-if="!generatedImages.length" class="dotted-frame">
+    <div  v-if="!generatedImages.length" class="dotted-frame">
     <div class="SdtoolsSmell">
       <img src="../assets/smell.png">
      </div>
      <div  class="image-text">生成图片区域</div>
-    </div>
-   <div v-else class="imageList">
+       </div>
+      <div v-else class="imageList">
     <div v-if="isGenerating">正在生成图片，请稍候...</div>
     <div v-for="image in generatedImages" 
          :key="image.id" 
@@ -218,8 +192,7 @@
     </div>
     </div>
     </div>
-   </div>
- 
+      </div>
   </div> 
   <PreviewImage 
          v-if="previewVisible" 
@@ -230,36 +203,29 @@
          class="preview-image"
          :currentTitle="currentTitle"
          :senceSubTitle="senceSubTitle"
-         :show-reference-option="true"
+         :show-reference-option="false"
           />  
  </div>
 </template>
 <script setup lang="ts">
 
-import { ref,watch ,defineProps} from 'vue';
+import { ref,defineProps,watch } from 'vue';
 import { useToast } from 'vue-toastification';
-import ProgressBar from './ProgressBar.vue'; 
-import { setMapStoreSuffix } from 'pinia';
+import ProgressBar from '@/components/ProgressBar.vue';
 import axiosInstance from '@/services/axiosConfig';
 import PreviewImage from '@/components/PreviewImage.vue';
-import ImageUploader from './ImageUploader.vue';
 
-
-const toast = useToast();
 const props = defineProps({
   currentTitle: String,
   senceSubTitle: String
 });
 
+
+const toast = useToast();
+
 const keywordsInput = ref<string>('');
 const imKeywordsInput = ref<string>('');
 const isGenerating = ref(false); // 控制生成图片按钮是否可点击的状态
-
-const isImageUploaded = ref(false); //图片上传状态
-const uploadedImageId = ref<Number | null>(null);
-const imageUrl = ref<string | null>(null); // 用于传递给 ImageUploader.vue 的图标
-const uploadedImageUrl = ref<string | null>(null);
-const referenceImage = ref<string | null>(null);
 
 /* 提示词下文本输入*/
 const text = ref('');
@@ -268,8 +234,6 @@ const updateText = (event: Event) => {
   text.value = target.value;
 };
 const isKeywordInputEmpty = ref(false);//提示词输入状态
-
-
 
 /*图片数量*/
 
@@ -285,28 +249,24 @@ interface CreateTaskResponse {
   taskId: string;
 }
 
-//默认选择，目前只能生成1张图片
+//默认选择
 const options = ref([
   { value: 'option1', text: 1 },
-  // { value: 'option2', text: 5 },
-  // { value: 'option3', text: 10 },
-  // { value: 'option3', text: 15 },
-  // { value: 'option3', text: 20 }
+  { value: 'option2', text: 5 },
+  { value: 'option3', text: 10 },
+  { value: 'option3', text: 15 },
+  { value: 'option3', text: 20 }
 ]);
 const selectedOption = ref(options.value[0].text);
 
 //图片与词的相关性
 const keywordsRelevance = ref(80);
-const imageRelevance = ref(80);
 const updateKeywordsRelevance = (value: number) => {
   keywordsRelevance.value = value;
 };
 
 const selectedImageId = ref(null);
 const previewVisible = ref(false);
-
-
-
 
 let taskId = ref<string | null>(null);
 let taskStatus = ref<string | null>(null);
@@ -316,23 +276,11 @@ let taskDetail = ref()
 //图片结果
 const generatedImages = ref([]);
 const imageList = ref<string | null>(null);
-  const updateimageRelevance = (value: number) => {
-  imageRelevance.value = value;
-};
 
-//上传成功事件动作
-const handleUploadSuccess = (imageId: Number) => {
- 
-  uploadedImageId.value = imageId;
-  uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageId}`; //更新图标
-  imageUrl.value = uploadedImageUrl.value; // 更新图标
-  isImageUploaded.value = true; //图片上传成功
-
-}; 
 
 
 //创建任务参数
-const task_type = ref(1);//图生图
+const task_type = ref(0);
 const width = ref<number>(512);
 const height = ref<number>(512);
 const steps = ref<number>(25);
@@ -368,33 +316,28 @@ watch(height, () => validateInput('height'));
 watch(steps, () => validateInput('steps'));
 watch(seed, () => validateInput('seed'));
 
-//生成随机字符串
-// function generateRandomString(length: number): string {  
-//   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';  
-//   let result = '';  
-//   const charactersLength = characters.length;  
-//   for (let i = 0; i < length; i++) {  
-//     result += characters.charAt(Math.floor(Math.random() * charactersLength));  
-//   }  
-//   return result;  
-// }  
+
+//生成随机字符串 Todo :deleted
+function generateRandomString(length: number): string {  
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';  
+  let result = '';  
+  const charactersLength = characters.length;  
+  for (let i = 0; i < length; i++) {  
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));  
+  }  
+  return result;  
+}  
 
 // 创建任务并获取任务ID
 const createTask = async () => {
   try {
-    /** 提示词为必填项 */
     if (!keywordsInput.value.trim()) {
     isKeywordInputEmpty.value = true;
-    toast.error("请输入提示词");
+    toast.info("请输入提示词");
     return false;
      }
      isKeywordInputEmpty.value = false;
-    /**图片为必传项 */
-     if (!isImageUploaded.value){
-      toast.error("请上传参考图片");
-      return false;
-     }
-
+   
     const params = {
         task_type: task_type.value, // 任务类型为文生图
         prompt: keywordsInput.value,
@@ -406,9 +349,6 @@ const createTask = async () => {
         steps: steps.value,
         seed: seed.value,
         // name: name.value,
-        ref_image_sim: imageRelevance.value/100,
-        ref_image_id: uploadedImageId.value, // 上传成功后imageId
-
         
       }
        const response = await axiosInstance.post(`/task/`, params);
@@ -475,8 +415,8 @@ const generateImages = async () => {
         generatedImages.value = response.data.data; // 返回的数据中包含图片数组
 
         imageList.value = generatedImages.value.map(image => image.id).join(',');
-        isGenerating.value = false; // 恢复生成图片按钮可点击状态        
-
+        isGenerating.value = false; // 恢复生成图片按钮可点击状态
+        
       } 
   };
     /**任务创建失败就返回 */
@@ -485,6 +425,7 @@ const generateImages = async () => {
       isGenerating.value = false;
       return;
     }
+    
 
   await checkTaskStatus(); // 首次调用检查任务状态
 }
@@ -495,6 +436,7 @@ const generateImages = async () => {
     isGenerating.value = false; // 恢复生成图片按钮可点击状态
   }
 };
+
 /*下载所有图片*/
 const downloadAllImages = async (filename: string) => {
   // 实现下载所有生成图片的逻辑
@@ -541,17 +483,19 @@ const showPreview = (imageId: null,taskId:Number) => {
 </script>
 
 <style>
-.image-image {
+.text-image {
   width:100%; 
   height: 100vh; 
   background: #FCFCFC; 
   justify-content: flex-start; 
   align-items: flex-start; 
   display: inline-flex;
+  overflow: auto;
+  position: relative; 
 }
 .setting {
   width: 460px;
-  height: 100%;
+  height: auto;
   padding: 20px;
   background: white;
   border-right: 1px #E3E3E3 solid;
@@ -574,7 +518,7 @@ textarea {
   resize: vertical;
   align-self: stretch;
   height: 80px; 
-  width:95%;
+  width:100%;
   padding-left:20px; 
   padding-right:20px;
   padding-top: 10px; /* 添加此行以设置上边距 */
@@ -594,7 +538,7 @@ textarea {
   align-items: flex-start;
   gap: 10px;
 }
-.Frame1000003490,.imageNum, .imageWH, .progressbar {
+.Frame3659, .Frame1000003490,.imageNum, .imageWH {
 
   display: flex;
   width: 420px;
@@ -602,13 +546,20 @@ textarea {
   align-items: center;
  
 } 
+.progressbar{
+  display: flex;
+  width: 420px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 10px;
+}
 
-.Frame3662 {
+.progressbar-title {
   width: 420px;
   justify-content: flex-start;
   align-items: center;
-  gap: 10px;
-  display: inline-flex;
+  display: flex;
 }
 
 .Frame3660{
@@ -637,8 +588,8 @@ textarea {
   gap: 20px;
 }
 .Frame1000003487 {
-  display: flex;
-  width: 100px;
+ display: flex;
+ width: 100px;
  height: 30px;
  padding: 11px 10px;
  justify-content: space-between;
@@ -691,13 +642,14 @@ textarea {
   color: #8E8E8E;
   font-size: 12px;
   display: flex;
-  width: flex;
+  width: 300px;
   height: 18px;
   flex-direction: column;
   justify-content: center;
   flex-shrink: 0;
   font-family: Nunito;
   font-style: normal;
+  /* font-weight: 700; */
   text-transform: capitalize;
 }
 .text-count {
@@ -719,14 +671,8 @@ textarea {
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 }
-.generateImage.disabled {
-  opacity: 0.5; /* 降低透明度以显示禁用状态 */
-  pointer-events: none; /* 禁用点击事件 */
-  background-color:gray;
-  cursor: not-allowed;
-}
-
 .generate-button {
   color: white;
   font-size: 16px;
@@ -738,9 +684,11 @@ textarea {
   font-family: Quicksand;
 }
  
-.generate-button.disabled {
+.generateImage.disabled {
   opacity: 0.5; /* 降低透明度以显示禁用状态 */
   pointer-events: none; /* 禁用点击事件 */
+  background-color:gray;
+  cursor: not-allowed;
 }
  
 .input-error {
@@ -751,33 +699,19 @@ textarea {
   display: flex;
   align-items: center;
   height: 30px;
-  position: relative;
+
 }
 
 .dimension-input {
-  width: 50px; /* 根据需要调整输入框宽度 */
+  width: 48px; /* 根据需要调整输入框宽度 */
   height: 24px;
   font-size: 14px;
   padding: 2px 4px;
   border: 1px solid transparent;
   border-radius: 4px;
   text-align: center;
-}
 
-.dimension-input.error {
-  border-color: red; /* 输入框边框变红 */
 }
-
-.error-message {
-  color: red;
-  font-size: 0.875rem;
-  width:200px;
-  height: 20px;
-  position: absolute;
-  bottom: -30px;
-  left: -20px;
-}
-
 .help-icon {
   width: 16px;
   height: 16px;
@@ -786,14 +720,14 @@ textarea {
 }
 
 .help-icon:hover .tooltip {
-  display: block;
+  display: block; /* 悬停时显示 */
 }
 
 .tooltip {
   display: none;
   position: absolute;
-  top: 25px; /* 根据需要调整 */
-  left: 50%;
+  top: -30px; /* 从 .help-icon 顶部向上偏移 */
+  right: -100px; /* 从 .help-icon 右边缘向外偏移 */
   transform: translateX(-50%);
   background-color: #333;
   color: #fff;
@@ -802,20 +736,8 @@ textarea {
   border-radius: 4px;
   white-space: nowrap;
   z-index: 10;
+  width: 300px;
 }
-
-.setting {  
-/* width: 460px;  */
-  height: flex;
-  padding: 20px; 
-  background: white; 
-  border-right: 1px #E3E3E3 solid; 
-  flex-direction: column; 
-  justify-content: space-between; 
-  align-items: center;
-  display: inline-flex;
- }
-
 
  .image-list-area {
   width: calc(100% - 920px); /*减去 .setting 和.preview 的宽度 */
@@ -824,9 +746,11 @@ textarea {
   background: #FCFCFC;
   flex-direction: column;
 }
+
 .image-list-area.expanded {
   width:calc(100% - 460px); /*减去 .setting 的宽度 */
   transition: width 0.3s ease; 
+  height: 100%;
 }
 
 .dotted-frame {
@@ -878,8 +802,8 @@ textarea {
   align-items: flex-start;
   gap: 2px;  
   background: #FCFCFC;
-}
 
+}
 .download-ttoi{
   height: 60px; 
   padding-left: 20px; 
@@ -891,17 +815,5 @@ textarea {
   align-items: center; 
   display: flex;
   cursor: pointer;
-}
-
-.imageP {
-  align-self: stretch;
-  height: 100px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  border: 1px #e5e5e5 solid;
-  justify-content: space-between;
-  align-items: center;
-  display: inline-flex;
 }
  </style>
