@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="Line"></div>
-    <img class="imageBig" :src="`http://13.215.140.116:5001/api/v1/image/${imageId}`" />
+    <img class="imageBig" :src="`${config.apiBaseUrl}/image/${imageId}`" />
     <div class="operation">
       <div class="op1" @click="downloadImage(imageId, `{{ taskDetail.seeds }}-{{ taskDetail.promp }}-image.jpg`)">
         <div class="SdtoolsDownload">
@@ -72,11 +72,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, PropType ,defineEmits} from 'vue';
+import { config } from '@/config';
+import { defineEmits} from 'vue';
 import axiosInstance from '@/services/axiosConfig';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { useToast } from 'vue-toastification';
-import { exit } from 'process';
 
 const toast = useToast();
 
@@ -101,7 +101,7 @@ const props = defineProps<{
   showReferenceOption: boolean;  
   currentTitle: string;
   senceSubTitle: string;
-  images: String;
+  images: String|null;
 }>();
 
 console.log(props.currentTitle);
@@ -112,7 +112,7 @@ if(props.images==="")
 
  }
 
-const imagesList = props.images.split(",");
+const imagesList = props.images ? props.images.split(",") : [];
 console.log(imagesList);
 console.log(props.imageId);
 const currentIndex = ref(imagesList.indexOf(String(props.imageId)));

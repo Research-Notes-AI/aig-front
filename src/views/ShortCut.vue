@@ -10,7 +10,7 @@
               :class="['middleItem', { active: selectedItem && selectedItem.subTitle === middleItem.subTitle }]"
               @click="selectItem(middleItem)" 
            >
-             <img :src="`http://13.215.140.116:5001/api/v1/image/${middleItem.imageSmall}`" class="middle-image" />
+             <img :src="`${config.apiBaseUrl}/image/${middleItem.imageSmall}`" class="middle-image" />
              <div class="middle-subtitle">{{ middleItem.subTitle }}</div>
           </div>
        </div>
@@ -91,7 +91,7 @@
       <div v-if="!(generatedImages.length)" class="senceInfo">
         <div class="text-label">场景说明</div>
         <div v-if="selectedItem" class="scene-description">{{ selectedItem.desc }}</div>
-        <img v-if="selectedItem" class="Image8" :src="`http://13.215.140.116:5001/api/v1/image/${selectedItem.imageBig}`" />
+        <img v-if="selectedItem" class="Image8" :src="`${config.apiBaseUrl}/image/${selectedItem.imageBig}`" />
        </div>
       <div v-else class="imageList">
          <div v-if="isGenerating">正在生成图片，请稍候...</div>
@@ -100,7 +100,7 @@
          class="image-container" 
          @click="showPreview(image.id,taskId)"
          >
-            <img class="imageItem" :src="'http://13.215.140.116:5001/api/v1/image/' + image.id" :alt="image.title" />
+            <img class="imageItem" :src="`${config.apiBaseUrl}/image/` + image.id" :alt="image.title" />
          </div>
       </div>
     <div v-if="!(generatedImages.length)" class="Frame3"     
@@ -133,7 +133,7 @@
       </div>
       <PreviewImage 
          v-if="previewVisible" 
-         :imageId="selectedImageId" 
+         :imageId="selectedImageId"
          @close="closePreview" 
          @imageDeleted="handleImageDeleted" 
          @referenceSet="handleReferenceSet"
@@ -159,6 +159,8 @@ import axiosInstance from '@/services/axiosConfig';
 
 import PreviewImage from '@/components/PreviewImage.vue';
 import  {useRouter, useRoute }  from 'vue-router'
+import { config } from '@/config';
+
 const router = useRouter();
 const route = useRoute();
  
@@ -180,7 +182,7 @@ const selectTab = (tab: string) => {
 const showPreview = (imageId: null,taskId:Number) => {
   selectedImageId.value = imageId;
   previewVisible.value = true;
-  uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageId}`; 
+  uploadedImageUrl.value =  `${config.apiBaseUrl}/image/${imageId}`; 
 
 
 };
@@ -235,7 +237,7 @@ const updateImageRelevance = (value: number) => {
 const handleUploadSuccess = (imageId: Number) => {
   isImageUploaded.value = true;
   uploadedImageId.value = imageId;
-  uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageId}`; 
+  uploadedImageUrl.value =  `${config.apiBaseUrl}/image/${imageId}`; 
   imageUrl.value = uploadedImageUrl.value; // 更新图标
   console.log(imageUrl.value);
 
@@ -244,7 +246,7 @@ const handleUploadSuccess = (imageId: Number) => {
 const handleReferenceSet = () => {
   isImageUploaded.value = true; //同上传图片成功
   uploadedImageId.value = selectedImageId.value; //为后续生成任务请求做准备
-  referenceImage.value =  `http://13.215.140.116:5001/api/v1/image/${selectedImageId.value}`;
+  referenceImage.value =  `${config.apiBaseUrl}/image/${selectedImageId.value}`;
   imageUrl.value = referenceImage.value; // 更新图标
   console.log( imageUrl.value);
 
@@ -281,7 +283,7 @@ const fetchData = async () => {
 
     if (sections.value.length > 0 && sections.value[0].items.length > 0) {
       selectedItem.value = sections.value[0].items[0];
-      // senceSubTitle.value =  selectedItem.value.subTitle;
+      senceSubTitle.value =  selectedItem.value.subTitle;
       }
     // successMessage.value = '获取项目成功'
   }
@@ -317,6 +319,7 @@ const selectItem = (item: any) => {
   generatedImages.value = [];
   isImageUploaded.value = false;
   imageUrl.value = '';
+  previewVisible.value = false;
 
 
   // // 强制刷新当前 ShortCut 页面
@@ -465,7 +468,7 @@ const generateImages = async () => {
     console.error('Error generating images:', error);
   } 
   finally {
-    isGenerating.value = false; // 恢复生成图片按钮可点击状态
+    // isGenerating.value = false; // 恢复生成图片按钮可点击状态
   }
 };
 
@@ -520,7 +523,7 @@ const handleImageDeleted = (imageId:any,imageNextId:any ) => {
     console.log(imageNextId);
     previewVisible.value = true;
     selectedImageId.value = imageNextId;
-    uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageNextId}`; 
+    uploadedImageUrl.value =  `${config.apiBaseUrl}/image/${imageNextId}`; 
 
   }
 }
@@ -532,8 +535,11 @@ const saveState = () => {
   localStorage.setItem('imageRelevance', String(imageRelevance.value));
   localStorage.setItem('keywordsRelevance', String(keywordsRelevance.value));
   localStorage.setItem('isImageUploaded',String(isImageUploaded.value));
-  localStorage.setItem('imageUrl',String(imageUrl.value));
-  localStorage.setItem('previewVisible',String(previewVisible.value))
+  if(imageUrl.value != null)
+  {localStorage.setItem('imageUrl',String(imageUrl.value));}
+
+  localStorage.setItem('previewVisible',String(previewVisible.value));
+  localStorage.setItem('taskDetail',JSON.stringify(taskDetail.value));
 };
 
 // 监听变化保存状态
@@ -549,14 +555,15 @@ onMounted(() => {
     keywordsRelevance.value = parseInt(localStorage.getItem('keywordsRelevance') ?? '80') || 80;
     const storedValue = localStorage.getItem('isImageUploaded');
     isImageUploaded.value = storedValue === 'true';
-    imageUrl.value = localStorage.getItem('imageUrl') || '';
+    imageUrl.value = localStorage.getItem('imageUrl') || null;
+    console.log(imageUrl.value);
+    taskDetail.value = JSON.parse(localStorage.getItem('taskDetail') || '[]');
     previewVisible.value = false;
   }
   else
   { // 初始化选中第一个标题
     currentTitle.value = '快捷场景';
     activeTitle.value = '快捷场景';
-    fetchData();
   }
 });
 </script>

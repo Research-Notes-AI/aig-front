@@ -367,6 +367,10 @@ onMounted(() => {
     activeTab.value = '图生图'
     currentTitle.value = '中文生图'
   }
+  if (route.path === '/main/TextToImage') {
+    activeTab.value = '文生图'
+    currentTitle.value = '中文生图'
+  }
 
 });
 </script>

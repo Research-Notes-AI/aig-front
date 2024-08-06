@@ -201,7 +201,7 @@
          class="image-container" 
          @click="showPreview(image.id,taskId)"
          >
-         <img class="imageItem" :src="'http://13.215.140.116:5001/api/v1/image/' + image.id" :alt="image.title" />
+         <img class="imageItem" :src="'${config.apiBaseUrl}/image/' + image.id" :alt="image.title" />
     </div>
     <div class="download-frame">
     <div class="download-frame-inner">
@@ -231,6 +231,7 @@
          :currentTitle="currentTitle"
          :senceSubTitle="senceSubTitle"
          :show-reference-option="true"
+         :images="imageList"
           />  
  </div>
 </template>
@@ -243,6 +244,7 @@ import { setMapStoreSuffix } from 'pinia';
 import axiosInstance from '@/services/axiosConfig';
 import PreviewImage from '@/components/PreviewImage.vue';
 import ImageUploader from '../components/ImageUploader.vue';
+import { config } from '@/config';
 
 
 const toast = useToast();
@@ -324,7 +326,7 @@ const imageList = ref<string | null>(null);
 const handleUploadSuccess = (imageId: Number) => {
  
   uploadedImageId.value = imageId;
-  uploadedImageUrl.value =  `http://13.215.140.116:5001/api/v1/image/${imageId}`; //更新图标
+  uploadedImageUrl.value =  `${config.apiBaseUrl}/image/${imageId}`; //更新图标
   imageUrl.value = uploadedImageUrl.value; // 更新图标
   isImageUploaded.value = true; //图片上传成功
 
@@ -492,7 +494,7 @@ const generateImages = async () => {
     console.error('Error generating images:', error);
   } 
   finally {
-    isGenerating.value = false; // 恢复生成图片按钮可点击状态
+    // isGenerating.value = false; // 恢复生成图片按钮可点击状态
   }
 };
 /*下载所有图片*/
@@ -721,6 +723,8 @@ textarea {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 40px;
+
 }
 .generateImage.disabled {
   opacity: 0.5; /* 降低透明度以显示禁用状态 */

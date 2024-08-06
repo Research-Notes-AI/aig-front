@@ -162,20 +162,21 @@
   </div>
   <div class="image-list-area"  
        :class="{ 'expanded': !previewVisible }">
-    <div  v-if="!generatedImages.length" class="dotted-frame">
+    <div  v-if="!generatedImages.length && !isGenerating " class="dotted-frame">
     <div class="SdtoolsSmell">
       <img src="../assets/smell.png">
      </div>
      <div  class="image-text">生成图片区域</div>
        </div>
-      <div v-else class="imageList">
-    <div v-if="isGenerating">正在生成图片，请稍候...</div>
-    <div v-for="image in generatedImages" 
+    <div v-else class="imageList">
+    <div v-if="isGenerating" >正在生成图片，请稍候...</div>
+      <div v-for="image in generatedImages" 
          :key="image.id" 
          class="image-container" 
          @click="showPreview(image.id,taskId)"
          >
-         <img class="imageItem" :src="'http://13.215.140.116:5001/api/v1/image/' + image.id" :alt="image.title" />
+         <img class="imageItem" :src="`${config.apiBaseUrl}/image/` + image.id" :alt="image.title" />
+    
     </div>
     <div class="download-frame">
     <div class="download-frame-inner">
@@ -195,7 +196,7 @@
       </div>
   </div> 
   <PreviewImage 
-         v-if="previewVisible" 
+         v-if="previewVisible && taskDetail" 
          :imageId="selectedImageId" 
          @close="closePreview" 
          @imageDeleted="handleImageDeleted" 
@@ -204,16 +205,19 @@
          :currentTitle="currentTitle"
          :senceSubTitle="senceSubTitle"
          :show-reference-option="false"
+         :images="imageList"
           />  
  </div>
 </template>
 <script setup lang="ts">
 
-import { ref,defineProps,watch } from 'vue';
+import { ref,defineProps,watch, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 import ProgressBar from '@/components/ProgressBar.vue';
 import axiosInstance from '@/services/axiosConfig';
 import PreviewImage from '@/components/PreviewImage.vue';
+import { useRouter,useRoute } from 'vue-router';
+import { config } from '@/config';
 
 const props = defineProps({
   currentTitle: String,
@@ -222,10 +226,15 @@ const props = defineProps({
 
 
 const toast = useToast();
+const router = useRouter();
+const route = useRoute();
 
 const keywordsInput = ref<string>('');
 const imKeywordsInput = ref<string>('');
 const isGenerating = ref(false); // 控制生成图片按钮是否可点击的状态
+
+const currentTitle = ref<string>('中文生图');
+const senceSubTitle = ref('文生图');
 
 /* 提示词下文本输入*/
 const text = ref('');
@@ -272,7 +281,9 @@ let taskId = ref<string | null>(null);
 let taskStatus = ref<string | null>(null);
 
 
-let taskDetail = ref()
+let taskDetail = ref({
+
+})
 //图片结果
 const generatedImages = ref([]);
 const imageList = ref<string | null>(null);
@@ -317,17 +328,6 @@ watch(steps, () => validateInput('steps'));
 watch(seed, () => validateInput('seed'));
 
 
-//生成随机字符串 Todo :deleted
-function generateRandomString(length: number): string {  
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';  
-  let result = '';  
-  const charactersLength = characters.length;  
-  for (let i = 0; i < length; i++) {  
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));  
-  }  
-  return result;  
-}  
-
 // 创建任务并获取任务ID
 const createTask = async () => {
   try {
@@ -347,9 +347,7 @@ const createTask = async () => {
         height: height.value,
         width: width.value,
         steps: steps.value,
-        seed: seed.value,
-        // name: name.value,
-        
+        seed: seed.value    
       }
        const response = await axiosInstance.post(`/task/`, params);
        taskId.value = response.data.data.id; 
@@ -397,6 +395,7 @@ const queryTaskStatus = async () => {
 const generateImages = async () => {
  try { 
   if(isGenerating.value) return; // 防止重复点击
+  previewVisible.value = false; //关闭预览区域
   isGenerating.value = true; // 设置生成图片按钮不可点击状态
 
   const checkTaskStatus = async () => {
@@ -416,7 +415,11 @@ const generateImages = async () => {
 
         imageList.value = generatedImages.value.map(image => image.id).join(',');
         isGenerating.value = false; // 恢复生成图片按钮可点击状态
-        
+        console.log(imageList.value);
+        console.log(taskId.value );
+        router.push({ name: 'TextToImage', query: { taskid: taskId.value } });
+        saveState();
+        isGenerating.value = false; //恢复生成图片按钮
       } 
   };
     /**任务创建失败就返回 */
@@ -433,7 +436,7 @@ const generateImages = async () => {
     console.error('Error generating images:', error);
   } 
   finally {
-    isGenerating.value = false; // 恢复生成图片按钮可点击状态
+    // isGenerating.value = false; // 恢复生成图片按钮可点击状态
   }
 };
 
@@ -465,21 +468,64 @@ function closePreview() {
 }
 
 // 处理图片删除
-const handleImageDeleted = (imageId:any) => {
-  generatedImages.value = generatedImages.value.filter(image => image.id !== imageId);
-  selectedImageId.value = null;
-  previewVisible.value = false;
-};
+const handleImageDeleted = (imageId:any,imageNextId:any ) => {
+
+//图片展示部分去掉删除的图片
+ generatedImages.value = generatedImages.value.filter(image => image.id !== imageId);  
+ if (imageNextId==="" ){
+   previewVisible.value = false;
+   selectedImageId.value = null;
+ }
+ else {
+   console.log(imageNextId);
+   previewVisible.value = true;
+   selectedImageId.value = imageNextId;
+
+ }
+}
 
 //点击图片时调用 
 const showPreview = (imageId: null,taskId:Number) => {
   selectedImageId.value = imageId;
   previewVisible.value = true;
-  // store.dispatch('fetchTaskDetails', taskId);
+};
+
+// 保存当前状态到 localStorage
+const saveState = () => {
+  localStorage.setItem('keywordsInput', keywordsInput.value);
+  localStorage.setItem('generatedImages', JSON.stringify(generatedImages.value));
+  localStorage.setItem('selectedOption',String(selectedOption.value));
+  localStorage.setItem('imKeywordsInput', imKeywordsInput.value);
+  localStorage.setItem('keywordsRelevance', String(keywordsRelevance.value));
+  localStorage.setItem('height',String(height.value));
+  localStorage.setItem('width',String(width.value));
+  localStorage.setItem('steps',String(steps.value));
+  localStorage.setItem('seed',String(seed.value));
+  localStorage.setItem('previewVisible',String(previewVisible.value))
 
 };
 
+// 监听变化保存状态
+watch([keywordsInput, generatedImages, imKeywordsInput, selectedOption, keywordsRelevance,height,width,steps,seed,previewVisible], saveState);
+onMounted(() => {
+  // 初始化选中第一个标题
+  senceSubTitle.value ='文生图';
+  currentTitle.value = '中文生图';
 
+  if (route.query.taskid) {
+    // 只有当有 taskid 时才恢复状态
+    keywordsInput.value = localStorage.getItem('keywordsInput') || '';
+    imKeywordsInput.value = localStorage.getItem('imKeywordsInput') || '';
+    generatedImages.value = JSON.parse(localStorage.getItem('generatedImages') || '[]');
+    keywordsRelevance.value = parseInt(localStorage.getItem('keywordsRelevance') ?? '80') || 80;
+    height.value = parseInt(localStorage.getItem('height') ?? '512' ) || 512;
+    width.value = parseInt(localStorage.getItem('width') ?? '512' ) || 512;
+    seed.value = parseInt(localStorage.getItem('seed') ?? '-1' ) || -1;
+    steps.value = parseInt(localStorage.getItem('steps') ?? '-1' ) || -1;
+    selectedOption.value = parseInt(localStorage.getItem('selectedOption') ?? '1' ) || 1;
+    previewVisible.value = false;
+  }
+});
 </script>
 
 <style>
@@ -663,6 +709,7 @@ textarea {
   word-wrap: break-word;
 }
 .generateImage {
+  
   width: 460px;
   height: 64px;
   padding: 11px;
@@ -726,8 +773,8 @@ textarea {
 .tooltip {
   display: none;
   position: absolute;
-  top: -30px; /* 从 .help-icon 顶部向上偏移 */
-  right: -100px; /* 从 .help-icon 右边缘向外偏移 */
+  top: 30px; /* 从 .help-icon 顶部向上偏移 */
+  right: -90px; /* 从 .help-icon 右边缘向外偏移 */
   transform: translateX(-50%);
   background-color: #333;
   color: #fff;

@@ -1,11 +1,11 @@
 <template>
   <div class="image-uploader">
     <input type="file" ref="fileInput" @change="onFileChange" accept="image/*" style="display: none;" />
-    <div v-if="!props.imageUrl" class="upload-icon" @click="triggerFileInput">
+    <div v-if="!imageUrl" class="upload-icon" @click="triggerFileInput">
       <img src="../assets/image-P.png" alt="Upload Icon" />
     </div>
     <div v-else class="image-preview" @click="triggerFileInput">
-      <img :src="props.imageUrl" alt="Image Preview" />
+      <img :src="imageUrl" alt="上传参考图片" />
     </div>
   </div>
 </template>
@@ -63,6 +63,7 @@ const onFileChange = async (event: Event) => {
 const triggerFileInput = () => {
   fileInput.value?.click();
 };
+
 </script>
 
 <style scoped>
