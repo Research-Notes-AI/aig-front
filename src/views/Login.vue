@@ -87,7 +87,7 @@ const login = async () => {
     localStorage.setItem('token', response.data.data.token)
     console.log(localStorage.getItem('token'))
     console.log('登录成功', response.data);
-    router.push('/main');
+    router.push('/');
   } catch (err) {
     if (error.response && err.response.status === 401) {
       error.value = '用户名或密码错误'

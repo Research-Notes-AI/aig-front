@@ -9,7 +9,7 @@
     <div class="Line"></div>
     <img class="imageBig" :src="`${config.apiBaseUrl}/image/${imageId}`" />
     <div class="operation">
-      <div class="op1" @click="downloadImage(imageId, `{{ taskDetail.seeds }}-{{ taskDetail.promp }}-image.jpg`)">
+      <div class="op1" @click="downloadImage(imageId, `${props.taskDetail.seed}-${props.taskDetail.prompt}-${props.imageId}.jpg`)">
         <div class="SdtoolsDownload">
           <img src="../assets/download_black.png" />
         </div>

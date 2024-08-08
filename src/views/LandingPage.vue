@@ -569,30 +569,30 @@ const aiImagesGeneratorStyle = {
     <div class="Frame2175">
       <div class="Frame36">
         <CardComponent
-          imageSrc = "require('@/assets/Cone_01.png')"
+          imageSrc = "../assets/Cone_01.png"
           title_inner = "模型底座"
           subtitle = "Stable Diffusion 3"
           gradientColors = "linear-gradient(133deg, #C47CFF 0%, #E6C7FF 100%)"
         />
         <CardComponent
-          imageSrc="require('@/assets/Cone_02.png')"
+          imageSrc="../assets/Cone_02.png"
           title_inner="标准场景"
           subtitle="生成简单场景图片"
-          gradientColors="linear-gradient(133deg, #7AC1FF 0%, #C6E4FE 100%)"
+          gradientColors = "linear-gradient(133deg, #7AC1FF 0%, #C6E4FE 100%)"
         />
       </div>
       <div class="Frame35">
         <CardComponent
-          imageSrc="@/assets/Cone_03.png"
-          title_inner="中文生图"
-          subtitle="用中文提示词输入"
-          gradientColors="linear-gradient(133deg, #7CE761 15.35%, #E6FBB8 87.95%)"
+          imageSrc="../assets/Cone_03.png"
+          title_inner = "中文生图"
+          subtitle = "用中文提示词输入"
+          gradientColors = "linear-gradient(133deg, #7CE761 0%, #E6FBB8 100%)"
         />
         <CardComponent
-          imageSrc="@/assets/Cone_04.png"
-          title_inner="高级生图"
-          subtitle="SD 原生 WebUI"
-          gradientColors="linear-gradient(133deg, #F8BD38 0%, #F8F5B2 100%)"
+          imageSrc="../assets/Cone_04.png"
+          title_inner = "高级生图"
+          subtitle = "SD 原生 WebUI"
+          gradientColors = "linear-gradient(133deg, #F8BD38 0%, #F8F5B2 100%)"
         />
       </div>
     </div>
@@ -700,17 +700,18 @@ header {
 /* 提取的样式 */  
 .LandingpageIndex11 {  
   /* max-width: 100%; /* 设置最大宽度 */   
-  width:100%;
+  /* width:100%;
   margin-left: auto;  
   margin-right: auto; /* 水平居中 */   
-  height: auto;  
-  position: fixed;
+  /* height: auto;    */
+  /* position: fixed; */
+
   background: white;  
   display: flex;  
   flex-direction: column;  
   justify-content: flex-start;  
   align-items: center;  
-  gap: 60px;  
+  gap: 60px;
   /* overflow-x: hidden /* 防止水平滚动 */
   /* box-sizing: border-box; 包括内边距和边框在内的宽度和高度 */
 }  

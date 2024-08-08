@@ -9,11 +9,10 @@
       </div>
       <div class="title">{{ title_inner }}<br />{{ subtitle }}</div>
     </div>
-  </template>
+</template>
   
   <script setup lang="ts">
    defineProps<{
-  
       imageSrc: string,
       title_inner: string,
       subtitle: string,
@@ -34,7 +33,7 @@
     box-shadow: 4px 4px 30px rgba(0, 0, 0, 0.1);
     border-radius: 16px;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;

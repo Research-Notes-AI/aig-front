@@ -201,7 +201,7 @@
          class="image-container" 
          @click="showPreview(image.id,taskId)"
          >
-         <img class="imageItem" :src="'${config.apiBaseUrl}/image/' + image.id" :alt="image.title" />
+         <img class="imageItem" :src="`${config.apiBaseUrl}/image/` + image.id" :alt="image.title" />
     </div>
     <div class="download-frame">
     <div class="download-frame-inner">
@@ -225,7 +225,8 @@
          v-if="previewVisible" 
          :imageId="selectedImageId" 
          @close="closePreview" 
-         @imageDeleted="handleImageDeleted" 
+         @imageDeleted="handleImageDeleted"
+         @referenceSet="handleReferenceSet"
          :taskDetail="taskDetail"
          class="preview-image"
          :currentTitle="currentTitle"
@@ -252,7 +253,8 @@ const props = defineProps({
   currentTitle: String,
   senceSubTitle: String
 });
-
+const currentTitle = ref<string>('中文生图');
+const senceSubTitle = ref('图生图');
 const keywordsInput = ref<string>('');
 const imKeywordsInput = ref<string>('');
 const isGenerating = ref(false); // 控制生成图片按钮是否可点击的状态
@@ -326,7 +328,7 @@ const imageList = ref<string | null>(null);
 const handleUploadSuccess = (imageId: Number) => {
  
   uploadedImageId.value = imageId;
-  uploadedImageUrl.value =  `${config.apiBaseUrl}/image/${imageId}`; //更新图标
+  uploadedImageUrl.value = `${config.apiBaseUrl}/image/${imageId}`; //更新图标
   imageUrl.value = uploadedImageUrl.value; // 更新图标
   isImageUploaded.value = true; //图片上传成功
 
@@ -538,7 +540,14 @@ const showPreview = (imageId: null,taskId:Number) => {
   // store.dispatch('fetchTaskDetails', taskId);
 
 };
+const handleReferenceSet = () => {
+  isImageUploaded.value = true; //同上传图片成功
+  uploadedImageId.value = selectedImageId.value; //为后续生成任务请求做准备
+  referenceImage.value =  `${config.apiBaseUrl}/image/${selectedImageId.value}`;
+  imageUrl.value = referenceImage.value; // 更新图标
+  console.log( imageUrl.value);
 
+};
 
 </script>
 
