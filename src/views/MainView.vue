@@ -53,28 +53,31 @@
               
       </div>
       <div class="leftBottom" >
-        <div class="Frame1000003507">
+        <div :class="['Frame1000003507', {'no-border': isCollapsed }]">
           <div class="ComponentAbstract01">
-            <div class="ComponentAbstract06">
+            <div :class="['ComponentAbstract06', { 'collapsed': isCollapsed }]">
+              
               <img class="Abstract06" src="../assets/profile-circle.png" />
             </div>
           </div>
           <div class="Larrykey" v-if="!isCollapsed" >LarryKey</div>
         </div>
-        <div class="Frame1000003506">
+        <div :class="['Frame1000003506', {'no-border': isCollapsed }]">
           <div class="CommonDocumentText">
             <div class="CommonDocumentText">
-              <div class="DocumentText">
+              <div
+              :class="['DocumentText', { 'collapsed': isCollapsed }]" >
                 <img src="../assets/document-text.png">
               </div>
             </div>
           </div>
           <div v-if="!isCollapsed" >教程</div>
         </div>
-        <div class="Frame1000003509">
+        <div :class="['Frame1000003509', {'no-border': isCollapsed }]">
           <div class="CommonMessageText">
             <div class="CommonMessageText">
-              <div class="MessageText">
+              <div
+              :class="['MessageText', { 'collapsed': isCollapsed }]">
                 <img src="../assets/message-text.png">
               </div>
             </div>
@@ -408,8 +411,8 @@ select {
   flex-direction: column; 
   justify-content: flex-start; 
   align-items: flex-start; 
+  border-right: 1px #E3E3E3 solid;
   display: flex;
-  border-left: 1px #E3E3E3 solid;
   box-sizing: border-box; /* 包含内边距和边框 */
 }
 
@@ -436,7 +439,8 @@ select {
   justify-content: space-between;
   align-items: center;
   display: flex;
-  box-sizing: border-box; /* 包含内边距和边框*/
+  box-sizing: border-box; /*包含内边距和边框*/
+  /* border-right: 1px #E3E3E3 solid; */
 } 
 /* .lefttop div {
       /* background-color: lightgrey; 为子元素添加背景颜色以便观察布局 */
@@ -530,6 +534,7 @@ select {
   width: 24px;
   height: 24px;
   position: relative;
+  padding-left: 20px;
 }
 
 .SidebarLeft img {
@@ -574,13 +579,6 @@ select {
 
 }
 
-.Frame3643 {
-  border: 1px #377DFF solid;
-}
-
-.Frame3652 {
-  border: 1px #E3E3E3 solid;
-}
 
 .Frame3649 {
   /* height: 44px;
@@ -659,7 +657,7 @@ select {
   display: flex;
   border-radius: 0px 16px 0px 0px;
   /* border-bottom: 1px solid #E3E3E3; */
-  
+  border-left: 1px solid #E3E3E3;
   box-sizing: border-box; /* 包含内边距和边框 */
 }
 
@@ -730,21 +728,7 @@ select {
   word-wrap: break-word;
 }
 
-/**right-bottom */
- .middle {
-   width: 300px;
-   height: 1180px; 
-   padding-top: 20px; 
-   padding-bottom: 20px; 
-   background: #FCFCFC; 
-   flex-direction: column; 
-   justify-content: flex-start; 
-   align-items: center; 
-   gap: 20px; 
-   display: inline-flex;
-   /* border-left: 1px #E3E3E3 solid; */
-   box-sizing: border-box;
-}
+
 .sence{
   width: 260px; 
   height: 122px; 
@@ -809,8 +793,9 @@ select {
 
 .sideLeft.collapsed {
   width: 80px; /* 只显示图标时的宽度 */
-  height: 100px;
   transition: width 0.3s;
+  height: 100%;
+
 }
 
 .SidebarItem {

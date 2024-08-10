@@ -195,7 +195,10 @@
      <div  class="image-text">生成图片区域</div>
     </div>
    <div v-else class="imageList">
-    <div v-if="isGenerating">正在生成图片，请稍候...</div>
+    <div v-if="isGenerating" class="loading-overlay">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">正在生成图片，请稍候...</div>
+    </div>
     <div v-for="image in generatedImages" 
          :key="image.id" 
          class="image-container" 
@@ -226,7 +229,8 @@
          :imageId="selectedImageId" 
          @close="closePreview" 
          @imageDeleted="handleImageDeleted"
-         @referenceSet="handleReferenceSet"
+         @uploadSuccess="handleUploadSuccess"
+         :referenceSet="handleReferenceSet"
          :taskDetail="taskDetail"
          class="preview-image"
          :currentTitle="currentTitle"
@@ -241,7 +245,6 @@
 import { ref,watch ,defineProps} from 'vue';
 import { useToast } from 'vue-toastification';
 import ProgressBar from '@/components/ProgressBar.vue';
-import { setMapStoreSuffix } from 'pinia';
 import axiosInstance from '@/services/axiosConfig';
 import PreviewImage from '@/components/PreviewImage.vue';
 import ImageUploader from '../components/ImageUploader.vue';
@@ -545,9 +548,10 @@ const handleReferenceSet = () => {
   uploadedImageId.value = selectedImageId.value; //为后续生成任务请求做准备
   referenceImage.value =  `${config.apiBaseUrl}/image/${selectedImageId.value}`;
   imageUrl.value = referenceImage.value; // 更新图标
-  console.log( imageUrl.value);
+  toast.info("设置参考图片成功！")
 
 };
+
 
 </script>
 
@@ -559,19 +563,8 @@ const handleReferenceSet = () => {
   justify-content: flex-start; 
   align-items: flex-start; 
   display: flex;
+  overflow: auto;
   position: relative; 
-
-}
-.setting {
-  width: 460px;
-  height: 100%;
-  padding: 20px;
-  background: white;
-  border-right: 1px #E3E3E3 solid;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
 }
 .setup {
   display: flex;
@@ -821,27 +814,30 @@ textarea {
 
 .setting {  
 /* width: 460px;  */
-  height: flex;
+  height: auto;
   padding: 20px; 
   background: white; 
   border-right: 1px #E3E3E3 solid; 
   flex-direction: column; 
   justify-content: space-between; 
   align-items: center;
-  display: inline-flex;
+  display: flex;
+  border-left: 1px solid #E3E3E3;
  }
 
 
  .image-list-area {
-  width: calc(100% - 920px); /*减去 .setting 和.preview 的宽度 */
-  height: 100%;
+  width: calc(100% - 920px); /*减去 setting 和preview 的宽度 */
+  height: 100vh;
   padding: 20px;
   background: #FCFCFC;
   flex-direction: column;
+  
 }
 .image-list-area.expanded {
-  width:calc(100% - 460px); /*减去 .setting 的宽度 */
+  width:calc(100% - 460px); /*减去 setting 的宽度 */
   transition: width 0.3s ease; 
+  height: 100vh;
 }
 
 .dotted-frame {
@@ -918,5 +914,40 @@ textarea {
   justify-content: space-between;
   align-items: center;
   display: inline-flex;
+}
+/* 加载中的遮罩层 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 加载中的旋转动画 */
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #09f;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #333;
 }
  </style>

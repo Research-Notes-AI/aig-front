@@ -169,7 +169,10 @@
      <div  class="image-text">生成图片区域</div>
        </div>
     <div v-else class="imageList">
-    <div v-if="isGenerating" >正在生成图片，请稍候...</div>
+      <div v-if="isGenerating" class="loading-overlay">
+       <div class="loading-spinner"></div>
+       <div class="loading-text">正在生成图片，请稍候...</div>
+      </div>
       <div v-for="image in generatedImages" 
          :key="image.id" 
          class="image-container" 
@@ -549,6 +552,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  border-left: 1px solid #E3E3E3;
 }
 .setup {
   display: flex;
@@ -862,5 +866,41 @@ textarea {
   align-items: center; 
   display: flex;
   cursor: pointer;
+}
+
+/* 加载中的遮罩层 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 加载中的旋转动画 */
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #09f;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #333;
 }
  </style>

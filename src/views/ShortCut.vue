@@ -92,9 +92,14 @@
         <div class="text-label">场景说明</div>
         <div v-if="selectedItem" class="scene-description">{{ selectedItem.desc }}</div>
         <img v-if="selectedItem" class="Image8" :src="`${config.apiBaseUrl}/image/${selectedItem.imageBig}`" />
+        <div v-if="isGenerating" class="loading-overlay">
+        <div class="loading-spinner"></div>
+         <div class="loading-text">正在生成图片，请稍候...</div>
+        </div>
        </div>
+
       <div v-else class="imageList">
-         <div v-if="isGenerating">正在生成图片，请稍候...</div>
+  
          <div v-for="image in generatedImages" 
          :key="image.id" 
          class="image-container" 
@@ -136,7 +141,7 @@
          :imageId="selectedImageId"
          @close="closePreview" 
          @imageDeleted="handleImageDeleted" 
-         @referenceSet="handleReferenceSet"
+         :referenceSet="setAsReferenceImage"
          :taskDetail="taskDetail"
          :shortcutId="shortcutId"
          :imageUrl="uploadedImageUrl"
@@ -528,6 +533,23 @@ const handleImageDeleted = (imageId:any,imageNextId:any ) => {
   }
 }
 
+const setAsReferenceImage = async () => {
+   console.log('');
+   try {
+    const response = await axiosInstance.post(`/shortcut/refimage`, {
+      image_id: selectedImageId.value,
+      shortcut_id: selectedItem.value.id,
+     });
+
+    handleUploadSuccess(selectedImageId.value);
+     toast.success('设置参考图片成功');
+
+  } catch (error) {
+    toast.error('设置参考图片失败');
+    console.error('设置参考图片失败', error);
+  }
+};
+
 // 保存当前状态到 localStorage
 const saveState = () => {
   localStorage.setItem('keywordsInput', keywordsInput.value);
@@ -586,21 +608,6 @@ select {
   outline: none; /* 移除默认的焦点样式 */
 }
 
-.sideRight {
-  flex-grow: 1;
-  width:calc(100% - 400px);
-  flex-direction: column; 
-  justify-content: flex-start; 
-  align-items: flex-start; 
-  display: flex;
-  border-left: 1px #E3E3E3 solid;
-  box-sizing: border-box; /* 包含内边距和边框 */
-}
-
-.sideRight.expanded {
-  width:calc(100% - 80px);
-  display: flex;
-}
 .right-bottom {
 
   display: flex;
@@ -942,7 +949,7 @@ select {
    align-items: center; 
    gap: 20px; 
    display: inline-flex;
-   /* border-left: 1px #E3E3E3 solid; */
+   border-left: 1px #E3E3E3 solid;
    box-sizing: border-box;
 }
 .sence{
@@ -1541,5 +1548,41 @@ textarea {
   font-weight: bold;
   color: #000;
   border-bottom: 2px solid #377DFF ;
+}
+
+/* 加载中的遮罩层 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 加载中的旋转动画 */
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #09f;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #333;
 }
 </style>

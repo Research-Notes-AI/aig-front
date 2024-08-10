@@ -17,8 +17,8 @@
       </div>
       <div v-if="showReferenceOption"  class="op2">
         <div
-            class="SdtoolsImageP" 
-            @click="setAsReferenceImage(imageId)"
+            class="SdtoolsImageP"
+            @click="handleClick"
           >
           <img src="../assets/image-ref.png" />
         </div>
@@ -102,6 +102,7 @@ const props = defineProps<{
   currentTitle: string;
   senceSubTitle: string;
   images: String|null;
+  referenceSet: Function;
 }>();
 
 console.log(props.currentTitle);
@@ -137,23 +138,17 @@ const downloadImage = async (imageId: Number, filename: string) => {
   }
 };
 
+
+// 处理点击事件并调用父组件传递的函数
+const handleClick = () => {
+  if (props.referenceSet) {
+    props.referenceSet();
+  }
+};
 //设置图片为参考图片
 const emits = defineEmits(['referenceSet', 'imageDeleted']);
 
-const setAsReferenceImage = async (imageId: Number) => {
-   try {
-    const response = await axiosInstance.post(`/shortcut/refimage`, {
-      image_id: props.imageId,
-      shortcut_id: props.shortcutId,
-     });
-     emits('referenceSet', props.imageUrl);
-     toast.success('设置参考图片成功');
 
-  } catch (error) {
-    toast.error('设置参考图片失败');
-    console.error('设置参考图片失败:', error);
-  }
-};
 //图片收藏
 
 const isFavorite = ref(false);
