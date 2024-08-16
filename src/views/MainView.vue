@@ -11,7 +11,7 @@
         </div>
       </div>
       <div :class="['CommonSidebarLeft', { 'collapsed': isCollapsed }]" >
-          <img :src="isCollapsed ? '../src/assets/sidebar-right.png' : '../src/assets/sidebar-left.png'"
+          <img :src="isCollapsed ? sidebarRight : sidebarLeft"
                 @click="toggleSidebar" 
                 />
       </div>
@@ -21,8 +21,8 @@
         <SidebarItem
           title="快捷场景"
           description="常用场景快捷生图"
-          :iconSrc="currentTitle === '快捷场景' ? '../assets/gallery-edit.png' : '../assets/gallery-favorite.png'"
-          :arrowSrc="currentTitle === '快捷场景' ? '../assets/arrow-right01.png' : '../assets/right01.png'"
+          :iconSrc="currentTitle === '快捷场景' ? galleryEdit : galleryFavorite"
+          :arrowSrc="currentTitle === '快捷场景' ? arrowRight01 : right01"
           :isActive="currentTitle === '快捷场景'"
           :isCollapsed = "isCollapsed"
           acitiveTitle="快捷场景" 
@@ -31,8 +31,8 @@
         <SidebarItem
           title="中文生图"
           description="用中文提示词与简单参数生成图片"
-          :iconSrc="currentTitle === '中文生图' ? '../assets/translate-gray.png' : '../assets/translate.png'"
-          :arrowSrc="currentTitle === '中文生图' ? '../assets/arrow-right01.png' : '../assets/right01.png'"
+          :iconSrc="currentTitle === '中文生图' ? translateGray : translate "
+          :arrowSrc="currentTitle === '中文生图' ? arrowRight01 : right01"
           :isActive="currentTitle === '中文生图'"
           :isCollapsed = "isCollapsed"
           @item-click="() => navigateTo('TextToImage')"
@@ -131,7 +131,15 @@ import { useToast } from 'vue-toastification';
 
 import SidebarItem from '../components/SideBarItem.vue';
 import  {useRouter, useRoute , RouterView}  from 'vue-router'
-import axiosInstance from '@/services/axiosConfig';
+
+import sidebarRight from '@/assets/sidebar-right.png';
+import sidebarLeft from '@/assets/sidebar-left.png';
+import galleryFavorite from '@/assets/gallery-favorite.png';
+import galleryEdit from '@/assets/gallery-edit.png';
+import translateGray from '@/assets/translate-gray.png';
+import translate from '@/assets/translate.png';
+import arrowRight01 from '@/assets/arrow-right01.png';
+import right01 from '@/assets/right01.png';
 
 
 const router = useRouter()
