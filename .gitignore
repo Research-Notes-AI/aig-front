@@ -13,6 +13,9 @@ dist
 dist-ssr
 coverage
 *.local
+src/*.d.ts
+src/**/*/d.ts
+.history
 
 /cypress/videos/
 /cypress/screenshots/

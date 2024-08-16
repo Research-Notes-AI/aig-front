@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import CardComponent from '../components/CardComponent.vue';
+import { type CSSProperties } from 'vue';
 import { ref } from 'vue';
 
 import { useRouter } from 'vue-router'
@@ -54,7 +55,7 @@ const toggleFaq = (index: number) => {
   faqs.value[index].open = !faqs.value[index].open;
 };
 
-const QAStyle = {
+const QAStyle:CSSProperties = {
   width: '100%',
   paddingLeft: '184px',
   paddingRight: '184px',
@@ -65,7 +66,7 @@ const QAStyle = {
   display: 'flex',
 };
 
-const faqStyle = {
+const faqStyle:CSSProperties = {
   width: '133px',
   height: '24px',
   textAlign: 'center',
@@ -78,7 +79,7 @@ const faqStyle = {
   wordWrap: 'break-word',
 };
 
-const questionTitleStyle = {
+const questionTitleStyle:CSSProperties = {
   width: '769px',
   height: '74px',
   textAlign: 'center',
@@ -90,7 +91,7 @@ const questionTitleStyle = {
   wordWrap: 'break-word',
 };
 
-const frame2176Style = {
+const frame2176Style:CSSProperties = {
   padding: '30px',
   background: 'white',
   boxShadow: '4px 4px 30px rgba(0, 0, 0, 0.10)',
@@ -113,7 +114,7 @@ const faqQuestionStyle = {
   display: 'inline-flex',
 };
 
-const questionStyle = {
+const  questionStyle:CSSProperties = {
   color: '#1D1D1D',
   fontSize: '16px',
   fontFamily: 'Nunito',
@@ -141,7 +142,7 @@ const arrowStyle = (isOpen: any) => ({
   transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
 });
 
-const faqAnswerStyle = {
+const faqAnswerStyle:CSSProperties = {
   width: '100%',
   color: '#000',
   fontSize: '16px',
@@ -169,7 +170,7 @@ const contactUsStyle = {
   display: 'inline-flex',
 };
 
-const frame2184Style = {
+const frame2184Style:CSSProperties = {
   height: '400px',
   flexDirection: 'column',
   justifyContent: 'center',
@@ -178,7 +179,7 @@ const frame2184Style = {
   display: 'inline-flex',
 };
 
-const textStyle = {
+const textStyle:CSSProperties = {
   width: '620px',
   height: '152px',
   color: '#1D1D1D',
@@ -189,7 +190,7 @@ const textStyle = {
   wordWrap: 'break-word',
 };
 
-const contactDetailsStyle = {
+const contactDetailsStyle:CSSProperties = {
   width: '637px',
   height: '60px',
   color: '#464646',
@@ -201,7 +202,7 @@ const contactDetailsStyle = {
   wordWrap: 'break-word',
 };
 
-const buttonContainerStyle = {
+const buttonContainerStyle:CSSProperties = {
   paddingLeft: '50px',
   paddingRight: '50px',
   paddingTop: '12px',
@@ -216,7 +217,7 @@ const buttonContainerStyle = {
   display: 'flex',
 };
 
-const buttonTextStyle = {
+const buttonTextStyle:CSSProperties = {
   color: 'white',
   fontSize: '16px',
   fontFamily: 'Nunito',
@@ -226,13 +227,13 @@ const buttonTextStyle = {
   wordWrap: 'break-word',
 };
 
-const group2176Style = {
+const group2176Style:CSSProperties = {
   width: '538px',
   height: '388px',
   position: 'relative',
 };
 
-const rectangle840Style = {
+const rectangle840Style:CSSProperties = {
   width: '294px',
   height: '288px',
   left: '244px',
@@ -242,7 +243,7 @@ const rectangle840Style = {
   borderRadius: '16px',
 };
 
-const rectangle839Style = {
+const rectangle839Style:CSSProperties = {
   width: '325px',
   height: '288px',
   left: '0px',
@@ -252,20 +253,20 @@ const rectangle839Style = {
   borderRadius: '16px',
 };
 
-const componentBottomStyle = {
+const componentBottomStyle:CSSProperties = {
   width: '1728px',
   height: '400px',
   position: 'relative',
   background: '#383638',
 };
 
-const termsPoliciesStyle = {
+const termsPoliciesStyle:CSSProperties = {
   left: '1051px',
   top: '81px',
   position: 'absolute',
 };
 
-const termsTitleStyle = {
+const termsTitleStyle:CSSProperties = {
   color: 'white',
   fontSize: '22px',
   fontFamily: 'Nunito',
@@ -273,7 +274,7 @@ const termsTitleStyle = {
   wordWrap: 'break-word',
 };
 
-const termsSpacerStyle = {
+const termsSpacerStyle:CSSProperties = {
   color: 'white',
   fontSize: '18.73px',
   fontFamily: 'Nunito',
@@ -281,7 +282,7 @@ const termsSpacerStyle = {
   wordWrap: 'break-word',
 };
 
-const termsTextStyle = {
+const termsTextStyle:CSSProperties = {
   color: 'white',
   fontSize: '18px',
   fontFamily: 'Nunito',
@@ -289,13 +290,13 @@ const termsTextStyle = {
   wordWrap: 'break-word',
 };
 
-const contactSupportStyle = {
+const contactSupportStyle:CSSProperties = {
   left: '1321px',
   top: '81px',
   position: 'absolute',
 };
 
-const contactTitleStyle = {
+const contactTitleStyle:CSSProperties = {
   color: 'white',
   fontSize: '22px',
   fontFamily: 'Nunito',
@@ -303,7 +304,7 @@ const contactTitleStyle = {
   wordWrap: 'break-word',
 };
 
-const contactSpacerStyle = {
+const contactSpacerStyle:CSSProperties = {
   color: 'white',
   fontSize: '18.73px',
   fontFamily: 'Nunito',
@@ -311,7 +312,7 @@ const contactSpacerStyle = {
   wordWrap: 'break-word',
 };
 
-const contactTextStyle = {
+const contactTextStyle:CSSProperties = {
   color: 'white',
   fontSize: '18.73px',
   fontFamily: 'Nunito',
@@ -319,7 +320,7 @@ const contactTextStyle = {
   wordWrap: 'break-word',
 };
 
-const line4Style = {
+const line4Style:CSSProperties = {
   width: '500px',
   height: '0px',
   left: '614px',
@@ -328,7 +329,7 @@ const line4Style = {
   border: '1px white solid',
 };
 
-const copyrightStyle = {
+const copyrightStyle:CSSProperties = {
   left: '692px',
   top: '337px',
   position: 'absolute',
@@ -339,7 +340,7 @@ const copyrightStyle = {
   wordWrap: 'break-word',
 };
 
-const frame2148Style = {
+const frame2148Style:CSSProperties = {
   left: '764px',
   top: '272px',
   position: 'absolute',
@@ -349,13 +350,13 @@ const frame2148Style = {
   display: 'inline-flex',
 };
 
-const group2143Style = {
+const group2143Style:CSSProperties = {
   width: '40px',
   height: '40px',
   position: 'relative',
 };
 
-const ellipse82Style = {
+const ellipse82Style:CSSProperties = {
   width: '40px',
   height: '40px',
   left: '0px',
@@ -365,7 +366,7 @@ const ellipse82Style = {
   borderRadius: '9999px',
 };
 
-const facebookStyle = {
+const facebookStyle:CSSProperties = {
   width: '24px',
   height: '24px',
   left: '7px',
@@ -373,7 +374,7 @@ const facebookStyle = {
   position: 'absolute',
 };
 
-const facebookVectorStyle = {
+const facebookVectorStyle:CSSProperties = {
   width: '11px',
   height: '20px',
   left: '7px',
@@ -382,13 +383,13 @@ const facebookVectorStyle = {
   border: '2px #383638 solid',
 };
 
-const group2144Style = {
+const group2144Style:CSSProperties = {
   width: '40px',
   height: '40.01px',
   position: 'relative',
 };
 
-const ellipse83Style = {
+const ellipse83Style:CSSProperties = {
   width: '40px',
   height: '40.01px',
   left: '0px',
@@ -398,7 +399,7 @@ const ellipse83Style = {
   borderRadius: '9999px',
 };
 
-const instagramStyle = {
+const instagramStyle:CSSProperties = {
   width: '24px',
   height: '24px',
   left: '8px',
@@ -406,7 +407,7 @@ const instagramStyle = {
   position: 'absolute',
 };
 
-const instagramVectorStyle = {
+const instagramVectorStyle:CSSProperties = {
   width: '20px',
   height: '20px',
   left: '2px',
@@ -415,7 +416,7 @@ const instagramVectorStyle = {
   border: '2px #383638 solid',
 };
 
-const instagramInnerVectorStyle = {
+const instagramInnerVectorStyle:CSSProperties = {
   width: '8px',
   height: '8px',
   left: '8.04px',
@@ -424,7 +425,7 @@ const instagramInnerVectorStyle = {
   border: '2px #383638 solid',
 };
 
-const instagramDotStyle = {
+const instagramDotStyle:CSSProperties = {
   width: '0.01px',
   height: '0px',
   left: '17.50px',
@@ -433,13 +434,13 @@ const instagramDotStyle = {
   border: '2px #383638 solid',
 };
 
-const group2147Style = {
+const group2147Style:CSSProperties = {
   width: '40px',
   height: '40.01px',
   position: 'relative',
 };
 
-const ellipse86Style = {
+const ellipse86Style:CSSProperties = {
   width: '40px',
   height: '40.01px',
   left: '0px',
@@ -449,7 +450,7 @@ const ellipse86Style = {
   borderRadius: '9999px',
 };
 
-const twitterStyle = {
+const twitterStyle:CSSProperties = {
   width: '24px',
   height: '24px',
   left: '8px',
@@ -457,7 +458,7 @@ const twitterStyle = {
   position: 'absolute',
 };
 
-const twitterVectorStyle = {
+const twitterVectorStyle:CSSProperties = {
   width: '22px',
   height: '17.94px',
   left: '1px',
@@ -466,7 +467,7 @@ const twitterVectorStyle = {
   border: '2px #383638 solid',
 };
 
-const frame1000003494Style = {
+const frame1000003494Style:CSSProperties = {
   left: '274px',
   top: '81px',
   position: 'absolute',
@@ -483,7 +484,7 @@ const abstract05Style = {
   borderRadius: '4px',
 };
 
-const aiImagesGeneratorStyle = {
+const aiImagesGeneratorStyle:CSSProperties = {
   width: '263px',
   height: '34px',
   color: 'white',

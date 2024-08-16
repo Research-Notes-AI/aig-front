@@ -171,20 +171,20 @@ const route = useRoute();
  
 
 const previewVisible = ref(false);
-const selectedImageId = ref(null);
+const selectedImageId = ref();
 
 const isImageUploaded = ref(false);
 const activeTab = ref('文生图');
 
 const selectTab = (tab: string) => {
   activeTab.value = tab;
-  senceSubTitle = activeTab.value;
+  senceSubTitle.value = activeTab.value;
   }
 
 // const imageId = ref();
 // const shortcutId = ref();
 //点击图片时调用 
-const showPreview = (imageId: null,taskId:Number) => {
+const showPreview = (imageId: string,taskId:Number) => {
   selectedImageId.value = imageId;
   previewVisible.value = true;
   uploadedImageUrl.value =  `${config.apiBaseUrl}/image/${imageId}`; 
@@ -220,14 +220,14 @@ const options = ref([
 
 
 const imageUrl = ref<string | null>(null); // 用于传递给 ImageUploader.vue 的图标
-const uploadedImageUrl = ref<string | null>(null);
+const uploadedImageUrl = ref<string>('');
 const referenceImage = ref<string | null>(null);
 const imageIdList = ref<string[]>([]);
 
 // 快捷场景生成任务入参
 const keywordsInput = ref<string>('');
 // const sim = ref<number>(0);
-const uploadedImageId = ref<Number | null>(null);
+const uploadedImageId = ref<Number>();
 const keywordsRelevance = ref(80);
 const imageRelevance = ref(80);
 const updateKeywordsRelevance = (value: number) => {
@@ -273,55 +273,65 @@ interface Image {
 
 // 定义响应类型
 interface CreateTaskResponse {
-  taskId: string;
+  taskId: Number;
 }
 
-const sections = ref([]);
-
 //获取快捷场景数据
-const fetchData = async () => {
-   try {
-    // error.value = ''
-    // successMessage.value = ''
-    const response = await axiosInstance.get('/shortcut/list');
-    sections.value = response.data.data;
+interface Item {
+  subTitle: string;
+  id:Number;
+  desc:string;
+  imageBig:Number;
+  imageSmall:Number;
+}
 
-    if (sections.value.length > 0 && sections.value[0].items.length > 0) {
-      selectedItem.value = sections.value[0].items[0];
-      senceSubTitle.value =  selectedItem.value.subTitle;
+interface Section {
+  items: Item[];
+  title: string;
+}
+
+const sections = ref<Section[]>([]);
+const selectedItem = ref<Item | null>(null);
+
+const fetchData = async () => {
+  try {
+    const response = await axiosInstance.get('/shortcut/list');
+    if (response.data.data !== null) {
+      sections.value = response.data.data;
+
+      if (sections.value.length > 0 && sections.value[0]?.items?.length > 0) {
+        selectedItem.value = sections.value[0].items[0];
+        senceSubTitle.value = selectedItem.value.subTitle;
       }
-    // successMessage.value = '获取项目成功'
-  }
-   catch (error) {
+      // successMessage.value = '获取项目成功'
+    } else {
+      toast.info(response.data.message);
+    }
+  } catch (error) {
     console.error('Error fetching data:', error);
   }
 };
 
-/** 中间部分item点击事件处理 */
-// import { defineProps, defineEmits } from 'vue'
-const selectedItem = ref(null)
 /** 创建任务 生成图片发送请求结果 */
-const generatedImages = ref([]);
-// const senceId=selectedItem.value;
-let taskId = ref<string | null>(null);
+const generatedImages = ref<Image[]>([]);
+let taskId = ref<Number>(0);
 let taskStatus = ref<string | null>(null);
 
 let taskDetail = ref();
 let shortcutId = ref();
 let senceSubTitle = ref("");
 
-const imageList = ref<string | null>(null);
+const imageList = ref<string>('');
 
  //选择快捷场景
 const selectItem = (item: any) => {
  selectedItem.value = item;
    if(selectedItem.value){
-   senceSubTitle = selectedItem.value.subTitle;
+   senceSubTitle.value = selectedItem.value.subTitle;
    
   // 重置输入状态
   keywordsInput.value = '';
   keywordsRelevance.value = 80;
-  generatedImages.value = [];
   isImageUploaded.value = false;
   imageUrl.value = '';
   previewVisible.value = false;
@@ -360,7 +370,7 @@ const createTask = async () => {
      }
      isKeywordInputEmpty.value = false;
     if (selectedItem.value ) {
-       shortcutId = selectedItem.value.id;
+       shortcutId.value = selectedItem.value.id;
        if(uploadedImageId.value){
        const params = {
         shortcut_id: selectedItem.value.id, // 替换为场景Id
@@ -430,6 +440,8 @@ const queryTaskStatus = async () => {
   }
 };
 
+
+
 //生成图片
 const generateImages = async () => {
   
@@ -452,12 +464,16 @@ const generateImages = async () => {
         };
         const response = await axiosInstance.get('/image/list', { params });
         generatedImages.value = response.data.data; // 返回的数据中包含图片数组
-
-        imageList.value = generatedImages.value.map(image => image.id).join(','); //用于下载图片用
+        
+          //用于下载图片用
+        if (generatedImages.value.length > 0) {
+          imageList.value = generatedImages.value.map(image => image.id).join(',');
+        }   
         console.log(imageList.value);
         isGenerating.value = false; // 恢复生成图片按钮可点击状态
-        console.log(taskId.value );
-        router.push({ name: 'ShortCut', query: { taskid: taskId.value } });
+        const taskIdString = taskId.value.toString();
+
+        router.push({ name: 'ShortCut', query: { taskid: taskIdString } });
         saveState();
       } 
   };
@@ -534,13 +550,15 @@ const handleImageDeleted = (imageId:any,imageNextId:any ) => {
 }
 
 const setAsReferenceImage = async () => {
-   console.log('');
+
    try {
+
+    if (selectedItem.value) {
     const response = await axiosInstance.post(`/shortcut/refimage`, {
       image_id: selectedImageId.value,
       shortcut_id: selectedItem.value.id,
      });
-
+    }
     handleUploadSuccess(selectedImageId.value);
      toast.success('设置参考图片成功');
 

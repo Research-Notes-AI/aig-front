@@ -1,6 +1,7 @@
 // src/services/axiosConfig.ts
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
-import vue from '../router'
+import router from '../router'
+
 
 
 // 创建一个 axios 实例
@@ -23,7 +24,7 @@ axiosInstance.interceptors.request.use(
     }
     else{
       //跳到登录
-      this.$router.push('login')
+      router.push({ name: 'login' });
     }
     return config
   },
@@ -31,5 +32,19 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error)
   }
 )
+
+ axios.interceptors.response.use(
+  response => response,
+  error => {
+    console.log(error);
+    if (error.response && error.response.errno === 401) {
+      // Token 过期或未授权，清除 token 并跳转到登录页
+      localStorage.removeItem('token');
+      console.log("跳转到登录页");
+      router.push({ name: 'login' });
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance

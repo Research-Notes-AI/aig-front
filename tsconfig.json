@@ -6,14 +6,18 @@
     },
     {
       "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./nightwatch/tsconfig.json"
     }
+    // {
+    //   "path": "./nightwatch/tsconfig.json"
+    // }
   ],
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true, // 如果需要生成声明文件
+    "declarationMap": true,
+    "target": "ES6",
+    "module": "esnext",
     "strict": true,
     "jsx": "preserve",
     "moduleResolution": "node",
@@ -30,9 +34,15 @@
   },
   "include": [
              "../src/**/*.ts", 
-             "src/**/*.d.ts", 
              "src/**/*.tsx", 
-             "/src/**/*.vue",
+             "src/**/*.vue",
              "src/**/*.ts"
-             ]
+             ],
+
+  "exclude": [
+    "node_modules", 
+    "src/**/*.d.ts",
+    "dist",
+    "build",
+  ]
 }

@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { config } from '@/config';
+import { config } from '../config';
 import { defineEmits} from 'vue';
 import axiosInstance from '@/services/axiosConfig';
 import { ref } from 'vue';
@@ -85,7 +85,7 @@ const toast = useToast();
 interface TaskDetail {
   height:string;
   width:string;
-  shortid:string;
+  shortid:number;
   update_time:string;
   steps:string;
   prompt:string;
@@ -95,18 +95,17 @@ interface TaskDetail {
 // 定义 props
 const props = defineProps<{
   taskDetail: TaskDetail;
-  imageId: Number;
-  shortcutId: Number;
-  imageUrl: string;
+  imageId: number;
+  shortcutId?: number;
+  imageUrl?: string;
   showReferenceOption: boolean;  
   currentTitle: string;
   senceSubTitle: string;
-  images: String|null;
+  images: string|null;
   referenceSet: Function;
 }>();
 
-console.log(props.currentTitle);
-console.log(props.senceSubTitle);
+
 if(props.images==="")
  {
   toast.error("获取不到图片!")
@@ -146,14 +145,14 @@ const handleClick = () => {
   }
 };
 //设置图片为参考图片
-const emits = defineEmits(['referenceSet', 'imageDeleted']);
+const emits = defineEmits(['referenceSet', 'imageDeleted','close']);
 
 
 //图片收藏
 
 const isFavorite = ref(false);
 
-const toggleFavorite = async (imageId:number) => {
+const toggleFavorite = async (imageId:Number) => {
   isFavorite.value = !isFavorite.value;
   try {
     await axiosInstance.post(`/image/like/${imageId}`, {

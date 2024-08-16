@@ -5,8 +5,6 @@ import ShortCut from '@/views/ShortCut.vue'
 import MainView from '@/views/MainView.vue'
 import TextToImage from '@/views/TextToImage.vue';
 import ImageToImage from '@/views/ImageToImage.vue';
-// import MainLayout from '../layouts/MainLayout.vue';
-import TaskDetails from '../views/TaskDetail.vue';
 
 const routes = [
   {
@@ -42,10 +40,6 @@ const routes = [
         path: 'ImageToImage',
         name: 'ImageToImage',
         component: ImageToImage
-      },
-      {
-        path: 'TaskDetails/:taskId',
-        component: TaskDetails
       }
     ]
   }
@@ -55,4 +49,17 @@ const router = createRouter({
   history: createWebHistory('/'),
   routes
 });
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token');
+  if (!token && to.name !== 'login') {
+    // 如果没有token并且要去的不是登录页，重定向到登录页
+    next({ name: 'login' });
+  } else {
+    // 如果有token或目标页是登录页，放行
+    next();
+  }
+});
+
+
 export default router

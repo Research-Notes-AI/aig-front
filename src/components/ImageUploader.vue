@@ -40,7 +40,9 @@ const onFileChange = async (event: Event) => {
   }
 
   const formData = new FormData()
+   if (file) {
   formData.append('file', file);
+  }
 
   try {
     error.value = ''

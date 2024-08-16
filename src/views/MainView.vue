@@ -155,7 +155,7 @@ const documentCode = computed(() => {
 
 const selectTab = (tab: string) => {
   activeTab.value = tab;
-  senceSubTitle = activeTab.value;
+  senceSubTitle.value = activeTab.value;
   if (tab === '图生图') {
     router.push('/main/ImageToImage')
   } else {
@@ -265,28 +265,9 @@ interface CreateTaskResponse {
 
 const sections = ref([]);
 
-//获取快捷场景数据
-const fetchData = async () => {
-   try {
-    // error.value = ''
-    // successMessage.value = ''
-    const response = await axiosInstance.get('/shortcut/list');
-    sections.value = response.data.data;
-
-    if (sections.value.length > 0 && sections.value[0].items.length > 0) {
-      selectedItem.value = sections.value[0].items[0];
-      // senceSubTitle.value =  selectedItem.value.subTitle;
-      }
-    // successMessage.value = '获取项目成功'
-  }
-   catch (error) {
-    console.error('Error fetching data:', error);
-  }
-};
-
 /** 中间部分item点击事件处理 */
 // import { defineProps, defineEmits } from 'vue'
-const selectedItem = ref(null)
+
 /** 创建任务 生成图片发送请求结果 */
 const generatedImages = ref([]);
 // const senceId=selectedItem.value;
@@ -299,16 +280,6 @@ let senceSubTitle = ref("");
 
 const imageList = ref<string | null>(null);
 
- //选择快捷场景
-const selectItem = (item: any) => {
- selectedItem.value = item;
-   if(selectedItem.value){
-   senceSubTitle = selectedItem.value.subTitle;
- }
- else
-  {toast.error("未选中场景！！！")}
-
-};
 
 /* 右下文本输入*/
 const text = ref('');
@@ -317,55 +288,8 @@ const updateText = (event: Event) => {
   text.value = target.value;
 };
 
-/*下载所有图片*/
-const downloadAllImages = async (filename: string) => {
-  // 实现下载所有生成图片的逻辑
-  const ids = imageList.value;
-try {
-    const response = await axiosInstance.get(`/image/download/${ids}`, {
-      responseType: 'blob',
-    });
-    
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (error) {
-    console.error('下载图片时出错:', error);
-  }
-};
-
-//重新生成图片
-const regenerateImages = async () => {
-  previewVisible.value = false; //关闭预览区
-  const isTaskCreated = await createTask(); //等待task创建成功后再 做生成图片请求
-
-  if (isTaskCreated) {
-    generatedImages.value = [];
-    await generateImages();
-  }
-};
-
-function closePreview() {
-  previewVisible.value = false;
-  selectedImageId.value = null;
-}
-
-// 处理图片删除
-const handleImageDeleted = (imageId:any) => {
-  generatedImages.value = generatedImages.value.filter(image => image.id !== imageId);
-  selectedImageId.value = null;
-  previewVisible.value = false;
-};
-
 onMounted(() => {
-  // 初始化选中第一个标题
-  // currentTitle.value = '快捷场景';
-  // activeTitle.value = '快捷场景';
-  fetchData();
+
   if (route.path === '/main/ImageToImage') {
     activeTab.value = '图生图'
     currentTitle.value = '中文生图'

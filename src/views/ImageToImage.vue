@@ -282,14 +282,14 @@ const isKeywordInputEmpty = ref(false);//提示词输入状态
 
 // 定义图片类型
 interface Image {
-  id: string;
+  id: number;
   url: string;
   title: string;
 }
 
 // 定义响应类型
 interface CreateTaskResponse {
-  taskId: string;
+  taskId: number;
 }
 
 //默认选择，目前只能生成1张图片
@@ -309,19 +309,19 @@ const updateKeywordsRelevance = (value: number) => {
   keywordsRelevance.value = value;
 };
 
-const selectedImageId = ref(null);
+const selectedImageId = ref<number>(0);
 const previewVisible = ref(false);
 
 
 
 
-let taskId = ref<string | null>(null);
+let taskId = ref<number>(0);
 let taskStatus = ref<string | null>(null);
 
 
 let taskDetail = ref()
 //图片结果
-const generatedImages = ref([]);
+const generatedImages = ref<Image[]>([]);
 const imageList = ref<string | null>(null);
   const updateimageRelevance = (value: number) => {
   imageRelevance.value = value;
@@ -526,18 +526,18 @@ try {
 /**关闭预览区域 */
 function closePreview() {
   previewVisible.value = false;
-  selectedImageId.value = null;
+  selectedImageId.value = 0;
 }
 
 // 处理图片删除
-const handleImageDeleted = (imageId:any) => {
+const handleImageDeleted = (imageId:number) => {
   generatedImages.value = generatedImages.value.filter(image => image.id !== imageId);
-  selectedImageId.value = null;
+  selectedImageId.value = 0;
   previewVisible.value = false;
 };
 
 //点击图片时调用 
-const showPreview = (imageId: null,taskId:Number) => {
+const showPreview = (imageId: number,taskId:number) => {
   selectedImageId.value = imageId;
   previewVisible.value = true;
   // store.dispatch('fetchTaskDetails', taskId);
