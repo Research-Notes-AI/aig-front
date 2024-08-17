@@ -296,17 +296,15 @@ const selectedItem = ref<Item | null>(null);
 const fetchData = async () => {
   try {
     const response = await axiosInstance.get('/shortcut/list');
-    if (response.data.data !== null) {
-      sections.value = response.data.data;
+    console.log('Fetched data:', response.data); // 添加日志
 
+      sections.value = response.data.data;
       if (sections.value.length > 0 && sections.value[0]?.items?.length > 0) {
         selectedItem.value = sections.value[0].items[0];
         senceSubTitle.value = selectedItem.value.subTitle;
-      }
+      
       // successMessage.value = '获取项目成功'
-    } else {
-      toast.info(response.data.message);
-    }
+    } 
   } catch (error) {
     console.error('Error fetching data:', error);
   }

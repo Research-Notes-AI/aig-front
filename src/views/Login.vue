@@ -55,6 +55,9 @@
 import { ref,reactive} from 'vue';
 import axios, { AxiosError } from 'axios'
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 const form = reactive({
   email: '',
@@ -76,6 +79,7 @@ const error = ref('')
 interface ErrorResponseData {
   errno: number;
   message: string;
+  success:boolean;
 }
 
 const login = async () => {
@@ -89,12 +93,19 @@ const login = async () => {
  
     // 处理成功登录后的逻辑
     // 保存token到localStorage
-    localStorage.setItem('token', response.data.data.token)
-    console.log('登录成功', response.data);
-    router.push('/');
+    if(response.data.errno === 1000)
+    {
+      toast.error(response.data.message);
+    }
+    else{
+      localStorage.setItem('token', response.data.data.token)
+      console.log('登录成功', response.data);
+      router.push('/');
+    }
+  
   } catch (err) {
     const axiosError = err as AxiosError<ErrorResponseData>;
-      if (axiosError.response && axiosError.response.data.errno === 1000) {
+      if (axiosError.response ) {
       error.value = '用户名或密码错误'
     } else {
       error.value = '登录失败，请稍后重试'
