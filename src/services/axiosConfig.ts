@@ -40,8 +40,8 @@ axiosInstance.interceptors.response.use(
        // 检查 errno 是否为 401，表示未登录
        if (response.data.errno === 401) {
         // 可选：显示一条消息
-        console.log("进入拦截器");
-        toast.error('1111请先登录');
+  
+        toast.error('请先登录');
         // 跳转到登录页
         router.push({ name: 'login' });
         // 可选：清除存储的 token 或其他用户信息

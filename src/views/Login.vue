@@ -22,7 +22,7 @@
         <div class="CommonEyeSlash"
           @click="togglePasswordVisibility">
           <div class="EyeSlash">
-           <img :src="isPasswordVisible ? 'src/assets/eye.png' : 'src/assets/eye-slash.png'">
+           <img :src="isPasswordVisible ? eye : eyeSlash">
           </div>
         </div>
       </div>
@@ -56,6 +56,9 @@ import { ref,reactive} from 'vue';
 import axios, { AxiosError } from 'axios'
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
+
+import eye from '@/assets/eye.png'
+import eyeSlash from '@/assets/eye-slash.png'
 
 const toast = useToast();
 
@@ -97,7 +100,8 @@ const login = async () => {
     {
       toast.error(response.data.message);
     }
-    else{
+    else
+    {
       localStorage.setItem('token', response.data.data.token)
       console.log('登录成功', response.data);
       router.push('/');
